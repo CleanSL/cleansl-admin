@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import StatCard from './components/StatCard';
+import StatCard from '../components/StatCard';
 import { LayoutDashboard, Truck, AlertCircle, Map as MapIcon, Settings, BarChart3 } from 'lucide-react';
-import NavItem from './components/NavItem';
-import { MOCK_STATS, MOCK_COMPLAINTS, MOCK_OPERATIONS } from './data/mockData';
+import NavItem from '../components/NavItem';
+import { MOCK_STATS, MOCK_COMPLAINTS, MOCK_OPERATIONS } from '../data/mockData';
 
 const Dashboard = () => {
   const [query, setQuery] = useState('');
