@@ -23,3 +23,10 @@ export const MOCK_COMPLAINTS = [
     image: 'https://example.com/trash-photo.jpg' // Eventually from Supabase Storage
   }
 ];
+
+export const MOCK_OPERATIONS = [
+  { id: 1, event: "Truck En Route", detail: "Truck T-05 | Ward 37: Kollupitiya", time: "Just now", status: "Moving", color: "blue" },
+  { id: 2, event: "Collection Success", detail: "Truck T-01 | Ward 07: Cinnamon Gardens", time: "2 mins ago", status: "Verified", color: "green" },
+  { id: 3, event: "AI Violation", detail: "Unsorted Waste | No. 15, Flower Rd", time: "14 mins ago", status: "Violation", color: "red" },
+  { id: 4, event: "Resident Complaint", detail: "Missed Pickup | No. 22, Galle Rd", time: "45 mins ago", status: "Pending", color: "amber" }
+];
