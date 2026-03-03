@@ -13,7 +13,10 @@
     "web-vitals": "^2.1.4"
   },
   "eslintConfig": {
-    "extends": [],
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ],
     "rules": {}
   },
   "scripts": {
