@@ -1,8 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import StatCard from '../components/StatCard';
-import { LayoutDashboard, Truck, AlertCircle, Map as MapIcon, Settings, BarChart3 } from 'lucide-react';
+import { LayoutDashboard, Truck, AlertCircle, Map as MapIcon, Settings as SettingsIcon, BarChart3 } from 'lucide-react';
 import NavItem from '../components/NavItem';
 import { MOCK_STATS, MOCK_COMPLAINTS, MOCK_OPERATIONS } from '../data/mockData';
+import Settings from "./Settings";
+
 
 const Dashboard = () => {
   const [query, setQuery] = useState('');
@@ -37,7 +39,7 @@ const Dashboard = () => {
           <p className="text-xs text-slate-400">Admin Dashboard Center</p>
         </div>
         <nav className="flex-1 px-4 space-y-2">
-          <NavItem icon={<LayoutDashboard size={20} />} label="Overview" active />
+          <NavItem icon={<LayoutDashboard size={20} />} label="Overview" active={activePage === "overview"} />
           <NavItem icon={<MapIcon size={20} />} label="Live Map" />
           <NavItem icon={<AlertCircle size={20} />} label="Complaints" />
           <NavItem icon={<Truck size={20} />} label="Fleet Status" />
@@ -47,7 +49,7 @@ const Dashboard = () => {
           className="p-4 border-t border-slate-800"
           onClick={() => setActivePage('settings')}
         >
-          <NavItem icon={<Settings size={20} />} label="Settings"  active={activePage === 'settings'} />
+          <NavItem icon={<SettingsIcon size={20} />} label="Settings"  active={activePage === 'settings'} />
         </div>
       </aside>
 
@@ -65,6 +67,9 @@ const Dashboard = () => {
         </header>
 
         <section className="flex-1 overflow-y-auto p-8">
+
+          {activePage === "overview" && (
+            <>
           <h3 className="text-2xl font-bold text-slate-800 mb-6">City Overview</h3>
           
           {/* DYNAMIC STAT CARDS - Linked to mockData.js */}
@@ -197,6 +202,9 @@ const Dashboard = () => {
               </table>
             </div>
           </div>
+            </>
+          )}
+          {activePage === "settings" && <Settings />}
         </section>
       </main>
     </div>
