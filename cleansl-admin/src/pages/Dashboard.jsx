@@ -7,6 +7,7 @@ import { MOCK_STATS, MOCK_COMPLAINTS, MOCK_OPERATIONS } from '../data/mockData';
 const Dashboard = () => {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('all');
+  const [activePage, setActivePage] = useState('overview');
 
   const filteredOperations = useMemo(() => {
     const q = (query || '').trim().toLowerCase();
@@ -42,8 +43,11 @@ const Dashboard = () => {
           <NavItem icon={<Truck size={20} />} label="Fleet Status" />
           <NavItem icon={<BarChart3 size={20} />} label="Analytics" />
         </nav>
-        <div className="p-4 border-t border-slate-800">
-          <NavItem icon={<Settings size={20} />} label="Settings" />
+        <div 
+          className="p-4 border-t border-slate-800"
+          onClick={() => setActivePage('settings')}
+        >
+          <NavItem icon={<Settings size={20} />} label="Settings"  active={activePage === 'settings'} />
         </div>
       </aside>
 
@@ -51,7 +55,7 @@ const Dashboard = () => {
       <main className="flex-1 flex flex-col overflow-hidden">
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8">
           <h2 className="text-lg font-semibold text-slate-700">Good Morning, User</h2>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 cursor-pointer" onClick={() => setActivePage('profile')}>
             <div className="text-right">
               <p className="text-sm font-medium">CMC Supervisor</p>
               <p className="text-xs text-slate-500 text-green-500">System Online</p>
