@@ -78,7 +78,31 @@
 .cs-comp-info { display: flex; align-items: center; gap: 16px; }
 .cs-comp-icon { width: 40px; height: 40px; background: #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0; flex-shrink: 0; }
 
+/* Update the existing pending class to include a border */
+.cs-badge.pending {
+    background: #fffbeb;
+    color: #d97706;
+    border: 1px solid #fef3c7; /* This adds the border you're missing */
+}
 
+/* For comparison, ensure your others look like this: */
+.cs-badge.active {
+    background: #ecfdf5;
+    color: #059669;
+    border: 1px solid #d1fae5;
+}
+
+.cs-badge.suspended {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fee2e2;
+}
+
+.cs-badge.fired {
+    background: #fff7ed;
+    color: #ea580c;
+    border: 1px solid #ffedd5;
+}
 @media (max-width: 1024px) {
   .cs-info-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

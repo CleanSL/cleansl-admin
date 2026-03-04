@@ -4,13 +4,14 @@ import {
   Upload, Plus, Building2, Users, Link as LinkIcon, FileText, 
   Phone, Calendar, Mail, Clock, Shield, MapPin, Truck,
   MoreVertical, ToggleRight, ToggleLeft, FileCheck, AlertCircle,
-  Radio, Map, MessageSquare, Pencil, X, CheckCircle2
+  Radio, Map, MessageSquare, Pencil, X, CheckCircle2, Trash2,
+  UserMinus, Plane, Ban
 } from 'lucide-react';
 
 export default function Settings() {
   const [activeTab, setActiveTab] = useState('Organization');
 
-  // --- UNIVERSAL LOGIC: Generates ID & Truck Count for ANY Council ---
+  // --- UNIVERSAL LOGIC ---
   const getCouncilMetrics = (name) => {
     const initials = name.split(' ').map(word => word[0]).join('').toUpperCase();
     const hash = name.length * 7; 
@@ -23,7 +24,6 @@ export default function Settings() {
   // --- STATE: Operational Info ---
   const [isEditingOrg, setIsEditingOrg] = useState(false);
   const [activeZone, setActiveZone] = useState('Colombo Central');
-  
   const [orgData, setOrgData] = useState({
     hotline: '+94 11 268 1198', 
     deployed: '2024-01-01', 
@@ -57,41 +57,71 @@ export default function Settings() {
   const availableCouncils = activeProvinceCouncils.filter(council => !zones.includes(council));
   const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(tempOrgData.email);
 
-  // --- HANDLERS ---
+  // --- FUNCTIONAL STATE: Users & Permissions ---
+  const [users, setUsers] = useState([
+    { id: 1, name: 'Kasun Perera', email: 'kasun.p@cleansl.gov.lk', dept: 'IT Operations', role: 'System Admin', status: 'Active' },
+    { id: 2, name: 'Nimali Silva', email: 'n.silva@cleansl.gov.lk', dept: 'Logistics', role: 'Fleet Dispatcher', status: 'Active' },
+    { id: 3, name: 'Amila Fernando', email: 'amila.f@cleansl.gov.lk', dept: 'Public Relations', role: 'Complaint Manager', status: 'On Leave' },
+    { id: 4, name: 'Ruwan Kumara', email: 'ruwan.k@cleansl.gov.lk', dept: 'Field Staff', role: 'Truck Supervisor', status: 'Suspended' }
+  ]);
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [editingUserId, setEditingUserId] = useState(null);
+  const [userData, setUserData] = useState({ name: '', email: '', dept: 'IT Operations', role: 'System Admin', status: 'Active' });
+
+  // --- HANDLERS: Organization ---
   const handleZoneSelect = (zoneName) => {
     setActiveZone(zoneName);
     const metrics = getCouncilMetrics(zoneName);
-    setOrgData(prev => ({
-      ...prev,
-      councilId: metrics.id,
-      fleet: metrics.fleet
-    }));
+    setOrgData(prev => ({ ...prev, councilId: metrics.id, fleet: metrics.fleet }));
   };
 
   const handleRemoveZone = (e, zoneToRemove) => {
     e.stopPropagation();
     const updatedZones = zones.filter(z => z !== zoneToRemove);
     setZones(updatedZones);
-    if (activeZone === zoneToRemove && updatedZones.length > 0) {
-      handleZoneSelect(updatedZones[0]);
-    }
+    if (activeZone === zoneToRemove && updatedZones.length > 0) handleZoneSelect(updatedZones[0]);
   };
 
   const displayDate = (isoString) => isoString.split('-').reverse().join('/');
 
-  // --- INLINE STYLES ---
+  // --- HANDLERS: Users ---
+  const handleAddOrUpdateUser = () => {
+    if (editingUserId) {
+      setUsers(users.map(u => u.id === editingUserId ? { ...userData, id: editingUserId } : u));
+    } else {
+      setUsers([...users, { ...userData, id: Date.now() }]);
+    }
+    setIsUserModalOpen(false);
+    setEditingUserId(null);
+    setUserData({ name: '', email: '', dept: 'IT Operations', role: 'System Admin', status: 'Active' });
+  };
+
+  const startEditUser = (user) => {
+    setEditingUserId(user.id);
+    setUserData({ name: user.name, email: user.email, dept: user.dept, role: user.role, status: user.status });
+    setIsUserModalOpen(true);
+  };
+
+  const deleteUser = (id) => {
+    setUsers(users.filter(u => u.id !== id));
+  };
+
+  const getStatusClass = (status) => {
+    switch(status) {
+      case 'Active': return 'active';
+      case 'Suspended': return 'suspended'; // Will be Red
+      case 'On Leave': return 'pending';    // Stays Yellow
+      case 'Terminated': return 'fired';     // Will be Orange/Dark Gray
+      default: return '';
+    }
+  };
+
+  // --- STYLES ---
   const inputStyle = { padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '13px', color: '#0f172a', outline: 'none', backgroundColor: '#f8fafc', width: '100%', boxSizing: 'border-box' };
   const saveBtnStyle = { background: '#0f172a', color: '#fff', border: 'none', padding: '6px 16px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '500' };
   const cancelBtnStyle = { background: '#f8fafc', color: '#475569', border: '1px solid #e2e8f0', padding: '6px 16px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '500' };
 
-  // --- STATIC DATA FOR OTHER TABS ---
-  const usersList = [
-    { name: 'Kasun Perera', email: 'kasun.p@cleansl.gov.lk', dept: 'IT Operations', role: 'System Admin', status: 'Active' },
-    { name: 'Nimali Silva', email: 'n.silva@cleansl.gov.lk', dept: 'Logistics', role: 'Fleet Dispatcher', status: 'Active' },
-    { name: 'Amila Fernando', email: 'amila.f@cleansl.gov.lk', dept: 'Public Relations', role: 'Complaint Manager', status: 'Pending' },
-    { name: 'Ruwan Kumara', email: 'ruwan.k@cleansl.gov.lk', dept: 'Field Staff', role: 'Truck Supervisor', status: 'Active' }
-  ];
-
+  // --- STATIC DATA: Integrations & Compliance (Unchanged) ---
   const integrationsList = [
     { id: 'gps', name: 'Live Fleet GPS API', desc: 'Real-time telemetry from garbage trucks.', icon: <MapPin color="#0f172a" />, active: true },
     { id: 'iot', name: 'Smart Bin LoRaWAN', desc: 'Syncs fill-level sensor data from public smart bins.', icon: <Radio color="#0f172a" />, active: true },
@@ -171,14 +201,55 @@ export default function Settings() {
 
   const renderUsersTab = () => (
     <div className="cs-col">
+      {isUserModalOpen && (
+        <div className="cs-card" style={{ marginBottom: '20px', border: '1px solid #0f172a' }}>
+          <div className="cs-card-header">
+            <h3>{editingUserId ? 'Edit Staff Member' : 'Register New Staff'}</h3>
+            <X size={18} style={{ cursor: 'pointer' }} onClick={() => setIsUserModalOpen(false)} />
+          </div>
+          <div className="cs-info-grid" style={{ padding: '10px 0' }}>
+            <div className="cs-info-item"><label>Full Name</label><input type="text" style={inputStyle} value={userData.name} onChange={e => setUserData({...userData, name: e.target.value})} /></div>
+            <div className="cs-info-item"><label>Email Address</label><input type="email" style={inputStyle} value={userData.email} onChange={e => setUserData({...userData, email: e.target.value})} /></div>
+            <div className="cs-info-item"><label>Department</label><select style={inputStyle} value={userData.dept} onChange={e => setUserData({...userData, dept: e.target.value})}><option>IT Operations</option><option>Logistics</option><option>Public Relations</option><option>Field Staff</option></select></div>
+            <div className="cs-info-item"><label>Role</label><select style={inputStyle} value={userData.role} onChange={e => setUserData({...userData, role: e.target.value})}><option>System Admin</option><option>Fleet Dispatcher</option><option>Complaint Manager</option><option>Truck Supervisor</option></select></div>
+            <div className="cs-info-item"><label>Employment Status</label>
+              <select style={inputStyle} value={userData.status} onChange={e => setUserData({...userData, status: e.target.value})}>
+                <option>Active</option>
+                <option>On Leave</option>
+                <option>Suspended</option>
+                <option>Terminated</option>
+              </select>
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
+            <button style={saveBtnStyle} onClick={handleAddOrUpdateUser}>{editingUserId ? 'Update Record' : 'Save Record'}</button>
+            <button style={cancelBtnStyle} onClick={() => { setIsUserModalOpen(false); setEditingUserId(null); }}>Cancel</button>
+          </div>
+        </div>
+      )}
+
       <div className="cs-card" style={{ padding: 0, overflow: 'hidden' }}>
         <div className="cs-card-header" style={{ padding: '24px', margin: 0, borderBottom: '1px solid #e2e8f0', alignItems: 'center' }}>
-          <div><h2>Staff Directory</h2><p style={{ margin: '4px 0 0 0', fontSize: '14px', color: '#64748b' }}>Manage dashboard access for staff.</p></div>
-          <button className="cs-btn cs-btn-outline"><Plus size={16} /> Add Staff</button>
+          <div><h2>Staff Directory</h2><p style={{ margin: '4px 0 0 0', fontSize: '14px', color: '#64748b' }}>Current fleet management and administrative personnel.</p></div>
+          <button className="cs-btn cs-btn-outline" onClick={() => { setIsUserModalOpen(true); setEditingUserId(null); setUserData({ name: '', email: '', dept: 'IT Operations', role: 'System Admin', status: 'Active' }); }}><Plus size={16} /> Add Staff</button>
         </div>
         <div className="cs-table-wrapper" style={{ margin: 0 }}><table className="cs-table"><thead><tr><th>USER</th><th>DEPARTMENT</th><th>ROLE</th><th>STATUS</th><th style={{ textAlign: 'right' }}>ACTIONS</th></tr></thead><tbody>
-          {usersList.map((user, idx) => (
-            <tr key={idx}><td style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold' }}>{user.name[0]}</div><div><div style={{ fontWeight: '500' }}>{user.name}</div><div style={{ fontSize: '12px', color: '#64748b' }}>{user.email}</div></div></td><td style={{ color: '#64748b' }}>{user.dept}</td><td><div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#475569' }}><Shield size={14} color="#94a3b8"/> {user.role}</div></td><td><span className={`cs-badge ${user.status === 'Active' ? 'active' : 'pending'}`}>{user.status}</span></td><td style={{ textAlign: 'right' }}><MoreVertical size={18} color="#94a3b8" style={{ cursor: 'pointer' }}/></td></tr>
+          {users.map((user) => (
+            <tr key={user.id}>
+              <td style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold' }}>{user.name[0]}</div>
+                <div><div style={{ fontWeight: '500' }}>{user.name}</div><div style={{ fontSize: '12px', color: '#64748b' }}>{user.email}</div></div>
+              </td>
+              <td style={{ color: '#64748b' }}>{user.dept}</td>
+              <td><div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#475569' }}><Shield size={14} color="#94a3b8"/> {user.role}</div></td>
+              <td><span className={`cs-badge ${getStatusClass(user.status)}`}>{user.status}</span></td>
+              <td style={{ textAlign: 'right' }}>
+                <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                  <Pencil size={16} color="#64748b" style={{ cursor: 'pointer' }} title="Edit" onClick={() => startEditUser(user)} />
+                  <Trash2 size={16} color="#ef4444" style={{ cursor: 'pointer' }} title="Remove" onClick={() => deleteUser(user.id)} />
+                </div>
+              </td>
+            </tr>
           ))}</tbody></table></div>
       </div>
     </div>
