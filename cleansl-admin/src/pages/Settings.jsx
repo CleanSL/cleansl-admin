@@ -10,14 +10,19 @@ import {
 export default function Settings() {
   const [activeTab, setActiveTab] = useState('Organization');
 
-  // --- STATIC DATA ---
   const zones = ['Colombo Central', 'Colombo North', 'Borella', 'Kollupitiya'];
-  
   const orgData = {
     hotline: '+94 11 268 1198', deployed: '01/01/2024', province: 'Western Province',
     email: 'admin@cleansl.gov.lk', regNo: 'CMC-WM-2026', councilId: 'CMC-001',
     portal: 'cleansl.gov.lk', fleet: '142 Trucks'
   };
+
+  const usersList = [
+    { name: 'Kasun Perera', email: 'kasun.p@cleansl.gov.lk', dept: 'IT Operations', role: 'System Admin', status: 'Active' },
+    { name: 'Nimali Silva', email: 'n.silva@cleansl.gov.lk', dept: 'Logistics', role: 'Fleet Dispatcher', status: 'Active' },
+    { name: 'Amila Fernando', email: 'amila.f@cleansl.gov.lk', dept: 'Public Relations', role: 'Complaint Manager', status: 'Pending' },
+    { name: 'Ruwan Kumara', email: 'ruwan.k@cleansl.gov.lk', dept: 'Field Staff', role: 'Truck Supervisor', status: 'Active' }
+  ];
 
   const renderOrganizationTab = () => (
     <div className="cs-col">
@@ -55,6 +60,47 @@ export default function Settings() {
     </div>
   );
 
+  const renderUsersTab = () => (
+    <div className="cs-col">
+      <div className="cs-card" style={{ padding: 0, overflow: 'hidden' }}>
+        <div className="cs-card-header" style={{ padding: '24px', margin: 0, borderBottom: '1px solid #e2e8f0', alignItems: 'center' }}>
+          <div>
+            <h2>Staff Directory</h2>
+            <p style={{ margin: '4px 0 0 0', fontSize: '14px', color: '#64748b' }}>Manage dashboard access for dispatchers, drivers, and supervisors.</p>
+          </div>
+          <button className="cs-btn cs-btn-outline"><Plus size={16} /> Add Staff</button>
+        </div>
+        <div className="cs-table-wrapper" style={{ margin: 0 }}>
+          <table className="cs-table">
+            <thead>
+              <tr>
+                <th>USER</th><th>DEPARTMENT</th><th>ROLE</th><th>STATUS</th><th style={{ textAlign: 'right' }}>ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody>
+              {usersList.map((user, idx) => (
+                <tr key={idx}>
+                  <td style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold' }}>{user.name[0]}</div>
+                    <div><div style={{ fontWeight: '500' }}>{user.name}</div><div style={{ fontSize: '12px', color: '#64748b' }}>{user.email}</div></div>
+                  </td>
+                  <td style={{ color: '#64748b' }}>{user.dept}</td>
+                  <td><div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#475569' }}><Shield size={14} color="#94a3b8"/> {user.role}</div></td>
+                  <td>
+                    <span className={`cs-badge ${user.status === 'Active' ? 'active' : user.status === 'Pending' ? 'pending' : ''}`}>
+                      {user.status}
+                    </span>
+                  </td>
+                  <td style={{ textAlign: 'right' }}><MoreVertical size={18} color="#94a3b8" style={{ cursor: 'pointer' }}/></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="cs-wrapper">
       <div className="cs-header" style={{ alignItems: 'flex-start' }}>
@@ -85,6 +131,7 @@ export default function Settings() {
 
       <div>
         {activeTab === 'Organization' && renderOrganizationTab()}
+        {activeTab === 'User & Permissions' && renderUsersTab()}
       </div>
     </div>
   );
