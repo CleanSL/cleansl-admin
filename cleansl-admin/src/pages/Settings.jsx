@@ -24,6 +24,13 @@ export default function Settings() {
     { name: 'Ruwan Kumara', email: 'ruwan.k@cleansl.gov.lk', dept: 'Field Staff', role: 'Truck Supervisor', status: 'Active' }
   ];
 
+  const integrationsList = [
+    { id: 'gps', name: 'Live Fleet GPS API', desc: 'Real-time telemetry from garbage trucks (Coordinates, Speed, Fuel).', icon: <MapPin color="#0f172a" />, active: true },
+    { id: 'iot', name: 'Smart Bin LoRaWAN', desc: 'Syncs fill-level sensor data from public smart bins across the city.', icon: <Radio color="#0f172a" />, active: true },
+    { id: 'lgn', name: 'Lanka Gov Network', desc: 'Secure VPN connection for municipal data reporting and audits.', icon: <Shield color="#0f172a" />, active: true },
+    { id: 'sms', name: 'Citizen Alert SMS', desc: 'Automated SMS alerts to citizens for collection delays or shifts.', icon: <Mail color="#0f172a" />, active: false }
+  ];
+
   const renderOrganizationTab = () => (
     <div className="cs-col">
       <div className="cs-card">
@@ -101,6 +108,40 @@ export default function Settings() {
     </div>
   );
 
+  const renderIntegrationsTab = () => (
+    <div className="cs-col">
+      <div className="cs-card">
+        <div className="cs-card-header" style={{ alignItems: 'center' }}>
+          <div>
+            <h2>Integration Management</h2>
+            <p style={{ margin: '4px 0 0 0', fontSize: '14px', color: '#64748b' }}>Manage data pipelines between CleanSL and external city infrastructure.</p>
+          </div>
+          <button className="cs-btn cs-btn-outline">
+            <Plus size={16} /> Add Integration
+          </button>
+        </div>
+      </div>
+
+      <div className="cs-integ-grid">
+        {integrationsList.map((app) => (
+          <div key={app.id} className="cs-card cs-integ-card" style={{ display: 'flex', flexDirection: 'column' }}>
+            <div className="cs-integ-header">
+              <div className="cs-integ-icon">{app.icon}</div>
+              <div style={{ padding: 0 }}>
+                {app.active ? <ToggleRight size={32} color="#10b981" /> : <ToggleLeft size={32} color="#cbd5e1" />}
+              </div>
+            </div>
+            <h3>{app.name}</h3>
+            <p style={{ flexGrow: 1 }}>{app.desc}</p>
+            <div className="cs-integ-footer">
+              <span style={{ fontSize: '12px', fontWeight: '600', color: app.active ? '#0f172a' : '#94a3b8' }}>{app.active ? 'Connected' : 'Disconnected'}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
   return (
     <div className="cs-wrapper">
       <div className="cs-header" style={{ alignItems: 'flex-start' }}>
@@ -132,6 +173,7 @@ export default function Settings() {
       <div>
         {activeTab === 'Organization' && renderOrganizationTab()}
         {activeTab === 'User & Permissions' && renderUsersTab()}
+        {activeTab === 'Integration' && renderIntegrationsTab()}
       </div>
     </div>
   );
