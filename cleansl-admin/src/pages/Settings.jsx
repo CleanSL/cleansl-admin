@@ -21,7 +21,7 @@ export default function Settings() {
     };
   };
 
-  // --- STATE: Operational Info ---
+  // --- STATE: Operational Info (Stay Same) ---
   const [isEditingOrg, setIsEditingOrg] = useState(false);
   const [activeZone, setActiveZone] = useState('Colombo Central');
   const [orgData, setOrgData] = useState({
@@ -36,7 +36,7 @@ export default function Settings() {
   });
   const [tempOrgData, setTempOrgData] = useState({ ...orgData });
 
-  // --- STATE: Council Zones ---
+  // --- STATE: Council Zones (Stay Same) ---
   const [zones, setZones] = useState(['Colombo Central', 'Colombo North', 'Borella', 'Kollupitiya']);
   const [isAddingZone, setIsAddingZone] = useState(false);
   const [newZone, setNewZone] = useState('');
@@ -57,7 +57,7 @@ export default function Settings() {
   const availableCouncils = activeProvinceCouncils.filter(council => !zones.includes(council));
   const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(tempOrgData.email);
 
-  // --- FUNCTIONAL STATE: Users & Permissions ---
+  // --- FUNCTIONAL STATE: Users & Permissions (Stay Same) ---
   const [users, setUsers] = useState([
     { id: 1, name: 'Kasun Perera', email: 'kasun.p@cleansl.gov.lk', dept: 'IT Operations', role: 'System Admin', status: 'Active' },
     { id: 2, name: 'Nimali Silva', email: 'n.silva@cleansl.gov.lk', dept: 'Logistics', role: 'Fleet Dispatcher', status: 'Active' },
@@ -67,6 +67,14 @@ export default function Settings() {
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [editingUserId, setEditingUserId] = useState(null);
   const [userData, setUserData] = useState({ name: '', email: '', dept: 'IT Operations', role: 'System Admin', status: 'Active' });
+
+  // --- FUNCTIONAL STATE: Integrations ---
+  const [integrations, setIntegrations] = useState([
+    { id: 'gps', name: 'Live Fleet GPS API', desc: 'Real-time telemetry from garbage trucks.', icon: <MapPin color="#0f172a" />, active: true },
+    { id: 'iot', name: 'Smart Bin LoRaWAN', desc: 'Syncs fill-level sensor data from public smart bins.', icon: <Radio color="#0f172a" />, active: true },
+    { id: 'lgn', name: 'Lanka Gov Network', desc: 'Secure VPN connection for municipal data reporting.', icon: <Shield color="#0f172a" />, active: true },
+    { id: 'sms', name: 'Citizen Alert SMS', desc: 'Automated SMS alerts to citizens.', icon: <Mail color="#0f172a" />, active: false }
+  ]);
 
   // --- HANDLERS: Organization ---
   const handleZoneSelect = (zoneName) => {
@@ -109,10 +117,31 @@ export default function Settings() {
   const getStatusClass = (status) => {
     switch(status) {
       case 'Active': return 'active';
-      case 'Suspended': return 'suspended'; // Will be Red
-      case 'On Leave': return 'pending';    // Stays Yellow
-      case 'Terminated': return 'fired';     // Will be Orange/Dark Gray
+      case 'Suspended': return 'suspended';
+      case 'On Leave': return 'pending';
+      case 'Terminated': return 'fired';
       default: return '';
+    }
+  };
+
+  // --- HANDLERS: Integrations ---
+  const toggleIntegration = (id) => {
+    setIntegrations(integrations.map(item => 
+      item.id === id ? { ...item, active: !item.active } : item
+    ));
+  };
+
+  const addNewIntegration = () => {
+    const name = prompt("Enter Feature Name:");
+    if (name) {
+      const newInteg = {
+        id: Date.now(),
+        name: name,
+        desc: 'Newly added online data service.',
+        icon: <LinkIcon color="#0f172a" />,
+        active: false
+      };
+      setIntegrations([...integrations, newInteg]);
     }
   };
 
@@ -121,14 +150,7 @@ export default function Settings() {
   const saveBtnStyle = { background: '#0f172a', color: '#fff', border: 'none', padding: '6px 16px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '500' };
   const cancelBtnStyle = { background: '#f8fafc', color: '#475569', border: '1px solid #e2e8f0', padding: '6px 16px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '500' };
 
-  // --- STATIC DATA: Integrations & Compliance (Unchanged) ---
-  const integrationsList = [
-    { id: 'gps', name: 'Live Fleet GPS API', desc: 'Real-time telemetry from garbage trucks.', icon: <MapPin color="#0f172a" />, active: true },
-    { id: 'iot', name: 'Smart Bin LoRaWAN', desc: 'Syncs fill-level sensor data from public smart bins.', icon: <Radio color="#0f172a" />, active: true },
-    { id: 'lgn', name: 'Lanka Gov Network', desc: 'Secure VPN connection for municipal data reporting.', icon: <Shield color="#0f172a" />, active: true },
-    { id: 'sms', name: 'Citizen Alert SMS', desc: 'Automated SMS alerts to citizens.', icon: <Mail color="#0f172a" />, active: false }
-  ];
-
+  // --- STATIC DATA: Compliance (Stay Same) ---
   const docsList = [
     { name: 'Environmental Clearance Certificate (CEA)', date: 'Exp: 12 Dec 2026', status: 'Valid', icon: <FileCheck size={20} color="#0f172a" /> },
     { name: 'Karadiyana Dump Site Authorized Permit', date: 'Exp: 30 Jun 2026', status: 'Valid', icon: <FileCheck size={20} color="#0f172a" /> },
@@ -257,10 +279,36 @@ export default function Settings() {
 
   const renderIntegrationsTab = () => (
     <div className="cs-col">
-      <div className="cs-card"><div className="cs-card-header" style={{ alignItems: 'center' }}><div><h2>Integration Management</h2><p style={{ margin: '4px 0 0 0', fontSize: '14px', color: '#64748b' }}>Manage data pipelines between CleanSL and infrastructure.</p></div><button className="cs-btn cs-btn-outline"><Plus size={16} /> Add Integration</button></div></div>
-      <div className="cs-integ-grid">{integrationsList.map((app) => (
-        <div key={app.id} className="cs-card cs-integ-card" style={{ display: 'flex', flexDirection: 'column' }}><div className="cs-integ-header"><div className="cs-integ-icon">{app.icon}</div><div style={{ padding: 0 }}>{app.active ? <ToggleRight size={32} color="#10b981" /> : <ToggleLeft size={32} color="#cbd5e1" />}</div></div><h3>{app.name}</h3><p style={{ flexGrow: 1 }}>{app.desc}</p><div className="cs-integ-footer"><span style={{ fontSize: '12px', fontWeight: '600', color: app.active ? '#0f172a' : '#94a3b8' }}>{app.active ? 'Connected' : 'Disconnected'}</span></div></div>
-      ))}</div>
+      <div className="cs-card">
+        <div className="cs-card-header" style={{ alignItems: 'center' }}>
+          <div>
+            <h2>Integration Management</h2>
+            <p style={{ margin: '4px 0 0 0', fontSize: '14px', color: '#64748b' }}>
+              Show online and offline features for CleanSL infrastructure.
+            </p>
+          </div>
+          <button className="cs-btn cs-btn-outline" onClick={addNewIntegration}><Plus size={16} /> Add Integration</button>
+        </div>
+      </div>
+      <div className="cs-integ-grid">
+        {integrations.map((app) => (
+          <div key={app.id} className="cs-card cs-integ-card" style={{ display: 'flex', flexDirection: 'column' }}>
+            <div className="cs-integ-header">
+              <div className="cs-integ-icon">{app.icon}</div>
+              <div style={{ padding: 0, cursor: 'pointer' }} onClick={() => toggleIntegration(app.id)}>
+                {app.active ? <ToggleRight size={32} color="#10b981" /> : <ToggleLeft size={32} color="#cbd5e1" />}
+              </div>
+            </div>
+            <h3>{app.name}</h3>
+            <p style={{ flexGrow: 1 }}>{app.desc}</p>
+            <div className="cs-integ-footer">
+              <span style={{ fontSize: '12px', fontWeight: '600', color: app.active ? '#0f172a' : '#94a3b8' }}>
+                {app.active ? 'Online' : 'Offline'}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 
