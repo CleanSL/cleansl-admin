@@ -1,15 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import './Settings.css';
 import { 
   Upload, Plus, Building2, Users, Link as LinkIcon, FileText, 
   Phone, Calendar, Mail, Clock, Shield, MapPin, Truck,
   MoreVertical, ToggleRight, ToggleLeft, FileCheck, AlertCircle,
   Radio, Map, MessageSquare, Pencil, X, CheckCircle2, Trash2,
-  UserMinus, Plane, Ban
+  UserMinus, Plane, Ban, Eye, FileWarning
 } from 'lucide-react';
 
 export default function Settings() {
   const [activeTab, setActiveTab] = useState('Organization');
+  const fileInputRef = useRef(null);
 
   // --- UNIVERSAL LOGIC ---
   const getCouncilMetrics = (name) => {
@@ -21,7 +22,47 @@ export default function Settings() {
     };
   };
 
-  // --- STATE: Operational Info (Stay Same) ---
+  // --- NEW: EXPORT LOGS LOGIC ---
+  const handleExportLogs = () => {
+    const timestamp = new Date().toLocaleString();
+    const logContent = `
+CLEAN SL SYSTEM SETTINGS LOG
+Generated: ${timestamp}
+---------------------------------------
+
+ORGANIZATION SUMMARY:
+- Active Council: ${activeZone}
+- Council ID: ${orgData.councilId}
+- Province: ${orgData.province}
+- Fleet Size: ${orgData.fleet} Trucks
+- Registered Zones: ${zones.join(', ')}
+
+STAFF SUMMARY:
+- Total Registered Personnel: ${users.length}
+- Active Users: ${users.filter(u => u.status === 'Active').length}
+
+DOCUMENT STATUS:
+${docsList.map(doc => `- ${doc.name}: Expires ${doc.expiry} (${getDocStatus(doc.expiry).label})`).join('\n')}
+
+FEATURES STATE:
+${integrations.map(i => `- ${i.name}: ${i.active ? 'ONLINE' : 'OFFLINE'}`).join('\n')}
+
+---------------------------------------
+END OF LOG
+    `;
+
+    const blob = new Blob([logContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `CleanSL_Settings_Log_${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  // --- STATE: Operational Info (No changes) ---
   const [isEditingOrg, setIsEditingOrg] = useState(false);
   const [activeZone, setActiveZone] = useState('Colombo Central');
   const [orgData, setOrgData] = useState({
@@ -36,7 +77,7 @@ export default function Settings() {
   });
   const [tempOrgData, setTempOrgData] = useState({ ...orgData });
 
-  // --- STATE: Council Zones (Stay Same) ---
+  // --- STATE: Council Zones (No changes) ---
   const [zones, setZones] = useState(['Colombo Central', 'Colombo North', 'Borella', 'Kollupitiya']);
   const [isAddingZone, setIsAddingZone] = useState(false);
   const [newZone, setNewZone] = useState('');
@@ -57,7 +98,7 @@ export default function Settings() {
   const availableCouncils = activeProvinceCouncils.filter(council => !zones.includes(council));
   const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(tempOrgData.email);
 
-  // --- FUNCTIONAL STATE: Users & Permissions (Stay Same) ---
+  // --- STATE: Users & Permissions (No changes) ---
   const [users, setUsers] = useState([
     { id: 1, name: 'Kasun Perera', email: 'kasun.p@cleansl.gov.lk', dept: 'IT Operations', role: 'System Admin', status: 'Active' },
     { id: 2, name: 'Nimali Silva', email: 'n.silva@cleansl.gov.lk', dept: 'Logistics', role: 'Fleet Dispatcher', status: 'Active' },
@@ -68,7 +109,7 @@ export default function Settings() {
   const [editingUserId, setEditingUserId] = useState(null);
   const [userData, setUserData] = useState({ name: '', email: '', dept: 'IT Operations', role: 'System Admin', status: 'Active' });
 
-  // --- FUNCTIONAL STATE: Integrations ---
+  // --- STATE: Features ---
   const [integrations, setIntegrations] = useState([
     { id: 'gps', name: 'Live Fleet GPS API', desc: 'Real-time telemetry from garbage trucks.', icon: <MapPin color="#0f172a" />, active: true },
     { id: 'iot', name: 'Smart Bin LoRaWAN', desc: 'Syncs fill-level sensor data from public smart bins.', icon: <Radio color="#0f172a" />, active: true },
@@ -76,7 +117,16 @@ export default function Settings() {
     { id: 'sms', name: 'Citizen Alert SMS', desc: 'Automated SMS alerts to citizens.', icon: <Mail color="#0f172a" />, active: false }
   ]);
 
-  // --- HANDLERS: Organization ---
+  // --- STATE: Documents ---
+  const [docsList, setDocsList] = useState([
+    { id: 1, name: 'Environmental Clearance Certificate (CEA)', renewed: '2023-12-12', expiry: '2026-12-12', file: null },
+    { id: 2, name: 'Karadiyana Dump Site Authorized Permit', renewed: '2024-01-01', expiry: '2026-06-30', file: null },
+    { id: 3, name: 'Fleet Vehicle Insurance Policies', renewed: '2025-03-04', expiry: '2026-03-04', file: null }
+  ]);
+  const [isDocModalOpen, setIsDocModalOpen] = useState(false);
+  const [newDoc, setNewDoc] = useState({ name: '', renewed: '', expiry: '', file: null });
+
+  // --- HANDLERS: Organization (No changes) ---
   const handleZoneSelect = (zoneName) => {
     setActiveZone(zoneName);
     const metrics = getCouncilMetrics(zoneName);
@@ -92,7 +142,7 @@ export default function Settings() {
 
   const displayDate = (isoString) => isoString.split('-').reverse().join('/');
 
-  // --- HANDLERS: Users ---
+  // --- HANDLERS: Users (No changes) ---
   const handleAddOrUpdateUser = () => {
     if (editingUserId) {
       setUsers(users.map(u => u.id === editingUserId ? { ...userData, id: editingUserId } : u));
@@ -124,41 +174,54 @@ export default function Settings() {
     }
   };
 
-  // --- HANDLERS: Integrations ---
+  // --- HANDLERS: Features ---
   const toggleIntegration = (id) => {
-    setIntegrations(integrations.map(item => 
-      item.id === id ? { ...item, active: !item.active } : item
-    ));
+    setIntegrations(integrations.map(item => item.id === id ? { ...item, active: !item.active } : item));
   };
 
   const addNewIntegration = () => {
     const name = prompt("Enter Feature Name:");
     if (name) {
-      const newInteg = {
-        id: Date.now(),
-        name: name,
-        desc: 'Newly added online data service.',
-        icon: <LinkIcon color="#0f172a" />,
-        active: false
-      };
-      setIntegrations([...integrations, newInteg]);
+      setIntegrations([...integrations, { id: Date.now(), name, desc: 'Newly added online data service.', icon: <LinkIcon color="#0f172a" />, active: false }]);
     }
   };
 
-  // --- STYLES ---
+  // --- HANDLERS: Documents ---
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) setNewDoc({ ...newDoc, name: file.name.split('.')[0], file: file });
+  };
+
+  const saveDocument = () => {
+    if (newDoc.name && newDoc.expiry) {
+      setDocsList([...docsList, { ...newDoc, id: Date.now() }]);
+      setIsDocModalOpen(false);
+      setNewDoc({ name: '', renewed: '', expiry: '', file: null });
+    }
+  };
+
+  const deleteDoc = (id) => setDocsList(docsList.filter(d => d.id !== id));
+
+  const renameDoc = (id) => {
+    const newName = prompt("Enter new filename:");
+    if (newName) setDocsList(docsList.map(d => d.id === id ? { ...d, name: newName } : d));
+  };
+
+  const getDocStatus = (expiryDate) => {
+    const today = new Date();
+    const expiry = new Date(expiryDate);
+    const diffDays = Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
+    if (diffDays < 0) return { label: 'Expired', class: 'fired', icon: <FileWarning size={14} /> };
+    if (diffDays <= 30) return { label: 'Expiring Soon', class: 'pending', icon: <AlertCircle size={14} /> };
+    return { label: 'Valid', class: 'active', icon: <FileCheck size={14} /> };
+  };
+
+  // --- STYLES (No changes) ---
   const inputStyle = { padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '13px', color: '#0f172a', outline: 'none', backgroundColor: '#f8fafc', width: '100%', boxSizing: 'border-box' };
   const saveBtnStyle = { background: '#0f172a', color: '#fff', border: 'none', padding: '6px 16px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '500' };
   const cancelBtnStyle = { background: '#f8fafc', color: '#475569', border: '1px solid #e2e8f0', padding: '6px 16px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '500' };
 
-  // --- STATIC DATA: Compliance (Stay Same) ---
-  const docsList = [
-    { name: 'Environmental Clearance Certificate (CEA)', date: 'Exp: 12 Dec 2026', status: 'Valid', icon: <FileCheck size={20} color="#0f172a" /> },
-    { name: 'Karadiyana Dump Site Authorized Permit', date: 'Exp: 30 Jun 2026', status: 'Valid', icon: <FileCheck size={20} color="#0f172a" /> },
-    { name: 'Fleet Vehicle Insurance Policies', date: 'Exp: 04 Mar 2026', status: 'Expiring Soon', icon: <AlertCircle size={20} color="#f59e0b" /> }
-  ];
-
-  // --- RENDERERS ---
-
+  // --- RENDERERS (Unchanged) ---
   const renderOrganizationTab = () => (
     <div className="cs-col">
       <div className="cs-card">
@@ -249,7 +312,6 @@ export default function Settings() {
           </div>
         </div>
       )}
-
       <div className="cs-card" style={{ padding: 0, overflow: 'hidden' }}>
         <div className="cs-card-header" style={{ padding: '24px', margin: 0, borderBottom: '1px solid #e2e8f0', alignItems: 'center' }}>
           <div><h2>Staff Directory</h2><p style={{ margin: '4px 0 0 0', fontSize: '14px', color: '#64748b' }}>Current fleet management and administrative personnel.</p></div>
@@ -277,63 +339,60 @@ export default function Settings() {
     </div>
   );
 
-  const renderIntegrationsTab = () => (
+  const renderFeaturesTab = () => (
     <div className="cs-col">
-      <div className="cs-card">
-        <div className="cs-card-header" style={{ alignItems: 'center' }}>
-          <div>
-            <h2>Integration Management</h2>
-            <p style={{ margin: '4px 0 0 0', fontSize: '14px', color: '#64748b' }}>
-              Show online and offline features for CleanSL infrastructure.
-            </p>
-          </div>
-          <button className="cs-btn cs-btn-outline" onClick={addNewIntegration}><Plus size={16} /> Add Integration</button>
-        </div>
-      </div>
-      <div className="cs-integ-grid">
-        {integrations.map((app) => (
-          <div key={app.id} className="cs-card cs-integ-card" style={{ display: 'flex', flexDirection: 'column' }}>
-            <div className="cs-integ-header">
-              <div className="cs-integ-icon">{app.icon}</div>
-              <div style={{ padding: 0, cursor: 'pointer' }} onClick={() => toggleIntegration(app.id)}>
-                {app.active ? <ToggleRight size={32} color="#10b981" /> : <ToggleLeft size={32} color="#cbd5e1" />}
-              </div>
-            </div>
-            <h3>{app.name}</h3>
-            <p style={{ flexGrow: 1 }}>{app.desc}</p>
-            <div className="cs-integ-footer">
-              <span style={{ fontSize: '12px', fontWeight: '600', color: app.active ? '#0f172a' : '#94a3b8' }}>
-                {app.active ? 'Online' : 'Offline'}
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
+      <div className="cs-card"><div className="cs-card-header" style={{ alignItems: 'center' }}><div><h2>Feature Management</h2><p style={{ margin: '4px 0 0 0', fontSize: '14px', color: '#64748b' }}>Show the features that are online now and offline.</p></div><button className="cs-btn cs-btn-outline" onClick={addNewIntegration}><Plus size={16} /> Add Feature</button></div></div>
+      <div className="cs-integ-grid">{integrations.map((app) => (
+        <div key={app.id} className="cs-card cs-integ-card" style={{ display: 'flex', flexDirection: 'column' }}><div className="cs-integ-header"><div className="cs-integ-icon">{app.icon}</div><div style={{ padding: 0, cursor: 'pointer' }} onClick={() => toggleIntegration(app.id)}>{app.active ? <ToggleRight size={32} color="#10b981" /> : <ToggleLeft size={32} color="#cbd5e1" />}</div></div><h3>{app.name}</h3><p style={{ flexGrow: 1 }}>{app.desc}</p><div className="cs-integ-footer"><span style={{ fontSize: '12px', fontWeight: '600', color: app.active ? '#0f172a' : '#94a3b8' }}>{app.active ? 'Online' : 'Offline'}</span></div></div>
+      ))}</div>
     </div>
   );
 
-  const renderComplianceTab = () => (
+  const renderDocumentsTab = () => (
     <div className="cs-col">
+      {isDocModalOpen && (
+        <div className="cs-card" style={{ marginBottom: '20px', border: '1px solid #0f172a' }}>
+          <div className="cs-card-header"><h3>Upload Document</h3><X size={18} style={{ cursor: 'pointer' }} onClick={() => setIsDocModalOpen(false)} /></div>
+          <div className="cs-info-grid" style={{ padding: '10px 0' }}>
+            <div className="cs-info-item"><label>Document Name</label><input type="text" style={inputStyle} value={newDoc.name} onChange={e => setNewDoc({...newDoc, name: e.target.value})} /></div>
+            <div className="cs-info-item"><label>Renewed Date</label><input type="date" style={inputStyle} value={newDoc.renewed} onChange={e => setNewDoc({...newDoc, renewed: e.target.value})} /></div>
+            <div className="cs-info-item"><label>Expiry Date</label><input type="date" style={inputStyle} value={newDoc.expiry} onChange={e => setNewDoc({...newDoc, expiry: e.target.value})} /></div>
+            <div className="cs-info-item"><label>Select File</label><div onClick={() => fileInputRef.current.click()} style={{ ...inputStyle, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', background: '#fff' }}><Upload size={14} /> {newDoc.file ? newDoc.file.name : 'Choose file...'}</div><input type="file" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileUpload} /></div>
+          </div>
+          <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}><button style={saveBtnStyle} onClick={saveDocument}>Save</button><button style={cancelBtnStyle} onClick={() => setIsDocModalOpen(false)}>Cancel</button></div>
+        </div>
+      )}
       <div className="cs-card">
-        <div className="cs-card-header" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '16px', alignItems: 'center' }}><div><h2>Operational Compliance Documents</h2><p style={{ margin: '4px 0 0 0', fontSize: '14px', color: '#64748b' }}>Required documentation for municipal fleet.</p></div><button className="cs-btn cs-btn-outline"><Plus size={16} /> Add Document</button></div>
-        <div className="cs-comp-list">{docsList.map((doc, idx) => (
-          <div key={idx} className="cs-comp-item"><div className="cs-comp-info"><div className="cs-comp-icon">{doc.icon}</div><div><div style={{ fontSize: '14px', fontWeight: '500' }}>{doc.name}</div><div style={{ fontSize: '12px', color: '#64748b' }}>{doc.date}</div></div></div><div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}><span className={`cs-badge ${doc.status === 'Valid' ? 'active' : 'pending'}`}>{doc.status}</span><button className="cs-btn cs-btn-outline" style={{ padding: '6px 12px', fontSize: '13px' }}>View</button></div></div>
-        ))}</div>
+        <div className="cs-card-header" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '16px', alignItems: 'center' }}><div><h2>Operational Documents</h2><p style={{ margin: '4px 0 0 0', fontSize: '14px', color: '#64748b' }}>Manage certifications and permits.</p></div><button className="cs-btn cs-btn-outline" onClick={() => setIsDocModalOpen(true)}><Plus size={16} /> Add Document</button></div>
+        <div className="cs-comp-list">{docsList.map((doc) => {
+            const status = getDocStatus(doc.expiry);
+            return (
+              <div key={doc.id} className="cs-comp-item">
+                <div className="cs-comp-info"><div className="cs-comp-icon"><FileText color="#0f172a" /></div><div><div style={{ fontSize: '14px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px' }}>{doc.name} <Pencil size={12} color="#94a3b8" style={{ cursor: 'pointer' }} onClick={() => renameDoc(doc.id)} /></div><div style={{ fontSize: '12px', color: '#64748b' }}>Exp: {displayDate(doc.expiry)}</div></div></div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}><span className={`cs-badge ${status.class}`} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{status.icon} {status.label}</span>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button className="cs-btn cs-btn-outline" style={{ padding: '6px' }} onClick={() => alert(`Opening: ${doc.name}`)}><Eye size={16} /></button>
+                    <button className="cs-btn cs-btn-outline" style={{ padding: '6px' }} onClick={() => deleteDoc(doc.id)}><Trash2 size={16} color="#ef4444" /></button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}</div>
       </div>
     </div>
   );
 
   return (
     <div className="cs-wrapper">
-      <div className="cs-header" style={{ alignItems: 'flex-start' }}><h3 style={{ margin: 0, fontSize: '1.5rem', lineHeight: '2rem', fontWeight: '700', color: '#1e293b' }}>System Settings</h3><div className="cs-actions" style={{ marginTop: '2px' }}><button className="cs-btn cs-btn-outline"><Upload size={16} /> Export Logs</button></div></div>
-      <div className="cs-tabs-container">{[{ id: 'Organization', icon: Building2 }, { id: 'User & Permissions', icon: Users }, { id: 'Integration', icon: LinkIcon }, { id: 'Compliance', icon: FileText }].map((tab) => (
+      <div className="cs-header" style={{ alignItems: 'flex-start' }}><h3 style={{ margin: 0, fontSize: '1.5rem', lineHeight: '2rem', fontWeight: '700', color: '#1e293b' }}>System Settings</h3><div className="cs-actions" style={{ marginTop: '2px' }}><button className="cs-btn cs-btn-outline" onClick={handleExportLogs}><Upload size={16} /> Export Logs</button></div></div>
+      <div className="cs-tabs-container">{[{ id: 'Organization', icon: Building2 }, { id: 'User & Permissions', icon: Users }, { id: 'Features', icon: LinkIcon }, { id: 'Documents', icon: FileText }].map((tab) => (
         <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`cs-tab ${activeTab === tab.id ? 'active' : ''}`}><tab.icon size={16} /> {tab.id}</button>
       ))}</div>
       <div>
         {activeTab === 'Organization' && renderOrganizationTab()}
         {activeTab === 'User & Permissions' && renderUsersTab()}
-        {activeTab === 'Integration' && renderIntegrationsTab()}
-        {activeTab === 'Compliance' && renderComplianceTab()}
+        {activeTab === 'Features' && renderFeaturesTab()}
+        {activeTab === 'Documents' && renderDocumentsTab()}
       </div>
     </div>
   );
