@@ -1,216 +1,91 @@
 import React, { useState } from 'react';
+import './Settings.css';
+import { 
+  Upload, Plus, Building2, Users, Link as LinkIcon, FileText, 
+  Phone, Calendar, Mail, Clock, Shield, MapPin, Truck,
+  MoreVertical, ToggleRight, ToggleLeft, FileCheck, AlertCircle,
+  Radio, Map, MessageSquare
+} from 'lucide-react';
 
 export default function Settings() {
-    const [settings, setSettings] = useState({
-        emailNotifications: true,
-        smsNotifications: false,
-        darkMode: false,
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: '',
-    });
+  const [activeTab, setActiveTab] = useState('Organization');
 
-    const [successMessage, setSuccessMessage] = useState('');
+  // --- STATIC DATA ---
+  const zones = ['Colombo Central', 'Colombo North', 'Borella', 'Kollupitiya'];
+  
+  const orgData = {
+    hotline: '+94 11 268 1198', deployed: '01/01/2024', province: 'Western Province',
+    email: 'admin@cleansl.gov.lk', regNo: 'CMC-WM-2026', councilId: 'CMC-001',
+    portal: 'cleansl.gov.lk', fleet: '142 Trucks'
+  };
 
-    const handleToggle = (key) => {
-        setSettings((prev) => ({
-            ...prev,
-            [key]: !prev[key],
-        }));
-    };
-
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setSettings((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
-    };
-
-    const handleSave = () => {
-        setSuccessMessage('Settings saved successfully!');
-        setTimeout(() => setSuccessMessage(''), 3000);
-    };
-
-    const handleReset = () => {
-        setSettings({
-            emailNotifications: true,
-            smsNotifications: false,
-            darkMode: false,
-            currentPassword: '',
-            newPassword: '',
-            confirmPassword: '',
-        });
-    };
-
-   return (
-    <div className="min-h-screen bg-gray-100 px-10 py-8">
-        <div className="max-w-5xl mx-auto">
-
-            <h2 className="text-2xl font-bold text-slate-800 mb-6">
-                Settings
-            </h2>
-
-            {successMessage && (
-                <div className="mb-6 p-4 bg-green-100 border border-green-300 text-green-700 rounded-lg">
-                    {successMessage}
-                </div>
-            )}
-
-            {/* Notifications Card */}
-            <div className="bg-white rounded-2xl shadow-md p-8 mb-8">
-                <h2 className="text-xl font-semibold mb-6 border-b pb-3">
-                    Notification Preferences
-                </h2>
-
-                <div className="space-y-6">
-
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="font-medium">Email Notifications</p>
-                            <p className="text-sm text-gray-500">
-                                Receive system alerts via email
-                            </p>
-                        </div>
-
-                        <button
-                            onClick={() => handleToggle("emailNotifications")}
-                            className={`w-14 h-7 rounded-full transition duration-300 ${
-                                settings.emailNotifications
-                                    ? "bg-green-500"
-                                    : "bg-gray-300"
-                            }`}
-                        >
-                            <div
-                                className={`w-6 h-6 bg-white rounded-full shadow-md transform transition ${
-                                    settings.emailNotifications
-                                        ? "translate-x-7"
-                                        : "translate-x-1"
-                                }`}
-                            />
-                        </button>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="font-medium">SMS Notifications</p>
-                            <p className="text-sm text-gray-500">
-                                Receive important alerts via SMS
-                            </p>
-                        </div>
-
-                        <button
-                            onClick={() => handleToggle("smsNotifications")}
-                            className={`w-14 h-7 rounded-full transition duration-300 ${
-                                settings.smsNotifications
-                                    ? "bg-green-500"
-                                    : "bg-gray-300"
-                            }`}
-                        >
-                            <div
-                                className={`w-6 h-6 bg-white rounded-full shadow-md transform transition ${
-                                    settings.smsNotifications
-                                        ? "translate-x-7"
-                                        : "translate-x-1"
-                                }`}
-                            />
-                        </button>
-                    </div>
-
-                </div>
-            </div>
-
-            {/* Appearance Card */}
-            <div className="bg-white rounded-2xl shadow-md p-8 mb-8">
-                <h2 className="text-xl font-semibold mb-6 border-b pb-3">
-                    Appearance
-                </h2>
-
-                <div className="flex items-center justify-between">
-                    <div>
-                        <p className="font-medium">Dark Mode</p>
-                        <p className="text-sm text-gray-500">
-                            Enable dark theme across dashboard
-                        </p>
-                    </div>
-
-                    <button
-                        onClick={() => handleToggle("darkMode")}
-                        className={`w-14 h-7 rounded-full transition duration-300 ${
-                            settings.darkMode
-                                ? "bg-green-500"
-                                : "bg-gray-300"
-                        }`}
-                    >
-                        <div
-                            className={`w-6 h-6 bg-white rounded-full shadow-md transform transition ${
-                                settings.darkMode
-                                    ? "translate-x-7"
-                                    : "translate-x-1"
-                            }`}
-                        />
-                    </button>
-                </div>
-            </div>
-
-            {/* Security Card */}
-            <div className="bg-white rounded-2xl shadow-md p-8 mb-8">
-                <h2 className="text-xl font-semibold mb-6 border-b pb-3">
-                    Account Security
-                </h2>
-
-                <div className="grid md:grid-cols-3 gap-6">
-
-                    <input
-                        type="password"
-                        name="currentPassword"
-                        placeholder="Current Password"
-                        value={settings.currentPassword}
-                        onChange={handleInputChange}
-                        className="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
-                    />
-
-                    <input
-                        type="password"
-                        name="newPassword"
-                        placeholder="New Password"
-                        value={settings.newPassword}
-                        onChange={handleInputChange}
-                        className="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
-                    />
-
-                    <input
-                        type="password"
-                        name="confirmPassword"
-                        placeholder="Confirm Password"
-                        value={settings.confirmPassword}
-                        onChange={handleInputChange}
-                        className="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
-                    />
-
-                </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex justify-end gap-4">
-
-                <button
-                    onClick={handleReset}
-                    className="px-6 py-3 bg-gray-200 rounded-lg font-medium hover:bg-gray-300 transition"
-                >
-                    Reset
-                </button>
-
-                <button
-                    onClick={handleSave}
-                    className="px-6 py-3 bg-gray-200 rounded-lg font-medium hover:bg-gray-300 transition"
-                >
-                    Save Changes
-                </button>
-
-            </div>
-
+  const renderOrganizationTab = () => (
+    <div className="cs-col">
+      <div className="cs-card">
+        <div className="cs-card-header" style={{ alignItems: 'center', flexWrap: 'nowrap', marginBottom: '16px' }}>
+          <div>
+            <h2>Council Zones Management</h2>
+            <p style={{ margin: '4px 0 0 0', fontSize: '14px', color: '#64748b' }}>Manage geographical dispatch zones and operational boundaries for the fleet.</p>
+          </div>
+          <button className="cs-btn cs-btn-outline"><Plus size={16} /> Add Council Zone</button>
         </div>
+        <div className="cs-billing-freq">
+          {zones.map((z, i) => <div key={i} className="cs-freq-box" style={{ background: '#f8fafc', color: '#0f172a' }}>{z}</div>)}
+        </div>
+      </div>
+      
+      <div className="cs-card">
+        <div className="cs-card-header" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '16px', marginBottom: '24px' }}>
+          <div>
+            <h2>Operational Information</h2>
+            <p style={{ margin: '4px 0 0 0', fontSize: '14px', color: '#64748b' }}>Primary details and system parameters for the municipal council.</p>
+          </div>
+        </div>
+        <div className="cs-info-grid">
+          <div className="cs-info-item"><label>Hotline</label><span><Phone /> {orgData.hotline}</span></div>
+          <div className="cs-info-item"><label>System Deployed</label><span><Calendar /> {orgData.deployed}</span></div>
+          <div className="cs-info-item"><label>Province</label><span>{orgData.province}</span></div>
+          <div className="cs-info-item"><label>Support Email</label><span><Mail /> {orgData.email}</span></div>
+          <div className="cs-info-item"><label>Council Reg No.</label><span><FileText /> {orgData.regNo}</span></div>
+          <div className="cs-info-item"><label>Council ID</label><span>{orgData.councilId}</span></div>
+          <div className="cs-info-item"><label>Web Portal</label><span><LinkIcon /> {orgData.portal}</span></div>
+          <div className="cs-info-item"><label>Fleet Size</label><span><Truck size={16} /> {orgData.fleet}</span></div>
+        </div>
+      </div>
     </div>
-);
+  );
+
+  return (
+    <div className="cs-wrapper">
+      <div className="cs-header" style={{ alignItems: 'flex-start' }}>
+        <h3 style={{ margin: 0, fontSize: '1.5rem', lineHeight: '2rem', fontWeight: '700', color: '#1e293b' }}>
+          System Settings
+        </h3>
+        <div className="cs-actions" style={{ marginTop: '2px' }}>
+          <button className="cs-btn cs-btn-outline"><Upload size={16} /> Export Logs</button>
+        </div>
+      </div>
+
+      <div className="cs-tabs-container">
+        {[
+          { id: 'Organization', icon: Building2 },
+          { id: 'User & Permissions', icon: Users },
+          { id: 'Integration', icon: LinkIcon },
+          { id: 'Compliance', icon: FileText }
+        ].map((tab) => (
+          <button 
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`cs-tab ${activeTab === tab.id ? 'active' : ''}`}
+          >
+            <tab.icon size={16} /> {tab.id}
+          </button>
+        ))}
+      </div>
+
+      <div>
+        {activeTab === 'Organization' && renderOrganizationTab()}
+      </div>
+    </div>
+  );
 }
