@@ -31,6 +31,12 @@ export default function Settings() {
     { id: 'sms', name: 'Citizen Alert SMS', desc: 'Automated SMS alerts to citizens for collection delays or shifts.', icon: <Mail color="#0f172a" />, active: false }
   ];
 
+  const docsList = [
+    { name: 'Environmental Clearance Certificate (CEA)', date: 'Exp: 12 Dec 2026', status: 'Valid', icon: <FileCheck size={20} color="#0f172a" /> },
+    { name: 'Karadiyana Dump Site Authorized Permit', date: 'Exp: 30 Jun 2026', status: 'Valid', icon: <FileCheck size={20} color="#0f172a" /> },
+    { name: 'Fleet Vehicle Insurance Policies', date: 'Exp: 04 Mar 2026', status: 'Expiring Soon', icon: <AlertCircle size={20} color="#f59e0b" /> }
+  ];
+
   const renderOrganizationTab = () => (
     <div className="cs-col">
       <div className="cs-card">
@@ -142,6 +148,37 @@ export default function Settings() {
     </div>
   );
 
+  const renderComplianceTab = () => (
+    <div className="cs-col">
+      <div className="cs-card">
+        <div className="cs-card-header" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '16px', alignItems: 'center' }}>
+          <div>
+            <h2>Operational Compliance Documents</h2>
+            <p style={{ margin: '4px 0 0 0', fontSize: '14px', color: '#64748b' }}>Required documentation for municipal fleet and waste operation.</p>
+          </div>
+          <button className="cs-btn cs-btn-outline"><Plus size={16} /> Add Document</button>
+        </div>
+        
+        <div className="cs-comp-list">
+          {docsList.map((doc, idx) => (
+            <div key={idx} className="cs-comp-item">
+              <div className="cs-comp-info">
+                <div className="cs-comp-icon">{doc.icon}</div>
+                <div><div style={{ fontSize: '14px', fontWeight: '500' }}>{doc.name}</div><div style={{ fontSize: '12px', color: '#64748b' }}>{doc.date}</div></div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <span className={`cs-badge ${doc.status === 'Valid' ? 'active' : 'pending'}`}>
+                  {doc.status}
+                </span>
+                <button className="cs-btn cs-btn-outline" style={{ padding: '6px 12px', fontSize: '13px' }}>View</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="cs-wrapper">
       <div className="cs-header" style={{ alignItems: 'flex-start' }}>
@@ -174,6 +211,7 @@ export default function Settings() {
         {activeTab === 'Organization' && renderOrganizationTab()}
         {activeTab === 'User & Permissions' && renderUsersTab()}
         {activeTab === 'Integration' && renderIntegrationsTab()}
+        {activeTab === 'Compliance' && renderComplianceTab()}
       </div>
     </div>
   );
