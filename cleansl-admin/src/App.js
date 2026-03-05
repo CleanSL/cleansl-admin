@@ -4,6 +4,8 @@ import LiveMap from './pages/LiveMap';
 import Complaints from './pages/Complaints';
 import FleetStatus from './pages/FleetStatus';
 import Analytics from './pages/Analytics';
+import Settings from './pages/Settings';
+import Profile from './pages/Profile';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 function App() {
@@ -17,6 +19,8 @@ function App() {
           <Route path="complaints" element={<Complaints />} />
           <Route path="fleet" element={<FleetStatus />} />
           <Route path="analytics" element={<Analytics />} />
+          <Route path="settings" element={<Settings />} />
+          <Route path="profile" element={<Profile />} />
         </Route>
       </Routes>
     </Router>

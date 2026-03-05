@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Truck, AlertCircle, Map as MapIcon, Settings as SettingsIcon, BarChart3 } from 'lucide-react';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { LayoutDashboard, Truck, AlertCircle, Map as MapIcon, Settings as SettingsIcon, BarChart3, User } from 'lucide-react';
 import NavItem from '../components/NavItem';
 import StatCard from '../components/StatCard';
 import { MOCK_STATS, MOCK_OPERATIONS } from '../data/mockData';
@@ -24,6 +24,7 @@ const Dashboard = () => {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('all');
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Logic from Aakif: Filter the live feed based on search and buttons
   const filteredOperations = useMemo(() => {
@@ -61,6 +62,7 @@ const Dashboard = () => {
           <NavItem icon={<BarChart3 size={20} />} label="Analytics" to="/analytics" />
         </nav>
         <div className="p-4 border-t border-slate-800">
+          <NavItem icon={<User size={20} />} label="Profile" to="/profile" />
           <NavItem icon={<SettingsIcon size={20} />} label="Settings" to="/settings" />
         </div>
       </aside>
@@ -74,9 +76,13 @@ const Dashboard = () => {
               <p className="text-sm font-black text-slate-800">CMC Supervisor</p>
               <p className="text-[10px] text-green-500 font-bold uppercase tracking-tighter italic">System Online</p>
             </div>
-            <div className="w-10 h-10 bg-green-100 rounded-2xl flex items-center justify-center text-green-700 font-black shadow-sm border border-green-200">
+            <button
+              type="button"
+              onClick={() => navigate('/profile')}
+              className="w-10 h-10 bg-green-100 rounded-2xl flex items-center justify-center text-green-700 font-black shadow-sm border border-green-200 hover:bg-green-200 transition-colors"
+            >
               CMC
-            </div>
+            </button>
           </div>
         </header>
 

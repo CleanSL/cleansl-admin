@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   User, Mail, Phone, MapPin, Building2, ShieldCheck, 
   Globe, CheckCircle2, Edit3, Clock, Key, Smartphone, 
@@ -10,6 +11,7 @@ import './Profile.css';
 export default function Profile() {
   const [activeTab, setActiveTab] = useState('Overview');
   const [isEditingOverview, setIsEditingOverview] = useState(false);
+  const navigate = useNavigate();
 
   // --- State for Overview ---
   const [personalInfo, setPersonalInfo] = useState({
@@ -185,13 +187,22 @@ export default function Profile() {
           </div>
         </div>
         <div className="cs-actions">
+            <button
+              className="cs-btn cs-btn-outline"
+              onClick={() => navigate('/settings')}
+              style={{ marginRight: '8px' }}
+            >
+              <ShieldCheck size={16} /> System Settings
+            </button>
             {!isEditingOverview ? (
-                <button className="cs-btn cs-btn-outline" onClick={handleEditProfileClick}><Edit3 size={16} /> Edit Profile</button>
+              <button className="cs-btn cs-btn-outline" onClick={handleEditProfileClick}>
+                <Edit3 size={16} /> Edit Profile
+              </button>
             ) : (
-                <div style={{display: 'flex', gap: '10px'}}>
-                    <button className="cs-btn cs-btn-outline" onClick={() => setIsEditingOverview(false)}>Cancel</button>
-                    <button className="cs-btn cs-btn-dark" onClick={saveOverview}><Save size={16} /> Save Changes</button>
-                </div>
+              <div style={{display: 'flex', gap: '10px'}}>
+                <button className="cs-btn cs-btn-outline" onClick={() => setIsEditingOverview(false)}>Cancel</button>
+                <button className="cs-btn cs-btn-dark" onClick={saveOverview}><Save size={16} /> Save Changes</button>
+              </div>
             )}
         </div>
       </div>
