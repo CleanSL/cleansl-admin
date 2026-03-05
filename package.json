@@ -5,6 +5,8 @@
     "lucide-react": "^0.575.0",
     "mapbox-gl": "^3.18.1"
   },
+  "dependencies": {},
+
   "devDependencies": {
     "autoprefixer": "^10.4.24",
     "postcss": "^8.5.6",
@@ -12,6 +14,6 @@
   },
   "scripts": {
     "start": "cd cleansl-admin && npm start",
-    "build": "cd cleansl-admin && npm build"
+    "build": "cd cleansl-admin && npm run build"
   }
 }
