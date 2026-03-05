@@ -4,6 +4,7 @@ import { LayoutDashboard, Truck, AlertCircle, Map as MapIcon, Settings as Settin
 import NavItem from '../components/NavItem';
 import { MOCK_STATS, MOCK_COMPLAINTS, MOCK_OPERATIONS } from '../data/mockData';
 import Settings from "./Settings";
+import Profile from "./Profile";
 
 
 const Dashboard = () => {
@@ -50,6 +51,7 @@ const Dashboard = () => {
           onClick={() => setActivePage('settings')}
         >
           <NavItem icon={<SettingsIcon size={20} />} label="Settings"  active={activePage === 'settings'} />
+          
         </div>
       </aside>
 
@@ -205,6 +207,7 @@ const Dashboard = () => {
             </>
           )}
           {activePage === "settings" && <Settings />}
+          {activePage === "profile" && <Profile />}
         </section>
       </main>
     </div>
