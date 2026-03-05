@@ -284,7 +284,7 @@ END OF LOG
     </div>
   );
 
-  const renderUsersTab = () => (
+ const renderUsersTab = () => (
     <div className="cs-col">
       {isUserModalOpen && (
         <div className="cs-card" style={{ marginBottom: '20px', border: '1px solid #0f172a' }}>
@@ -312,29 +312,58 @@ END OF LOG
           </div>
         </div>
       )}
-      <div className="cs-card" style={{ padding: 0, overflow: 'hidden' }}>
-        <div className="cs-card-header" style={{ padding: '24px', margin: 0, borderBottom: '1px solid #e2e8f0', alignItems: 'center' }}>
-          <div><h2>Staff Directory</h2><p style={{ margin: '4px 0 0 0', fontSize: '14px', color: '#64748b' }}>Current fleet management and administrative personnel.</p></div>
-          <button className="cs-btn cs-btn-outline" onClick={() => { setIsUserModalOpen(true); setEditingUserId(null); setUserData({ name: '', email: '', dept: 'IT Operations', role: 'System Admin', status: 'Active' }); }}><Plus size={16} /> Add Staff</button>
+
+      {/* NEW: Dedicated Header Card matching Features Tab */}
+      <div className="cs-card">
+        <div className="cs-card-header" style={{ alignItems: 'center' }}>
+          <div>
+            <h2>Staff Directory</h2>
+            <p style={{ margin: '4px 0 0 0', fontSize: '14px', color: '#64748b' }}>Current fleet management and administrative personnel.</p>
+          </div>
+          <button className="cs-btn cs-btn-outline" onClick={() => { 
+            setIsUserModalOpen(true); 
+            setEditingUserId(null); 
+            setUserData({ name: '', email: '', dept: 'IT Operations', role: 'System Admin', status: 'Active' }); 
+          }}>
+            <Plus size={16} /> Add Staff
+          </button>
         </div>
-        <div className="cs-table-wrapper" style={{ margin: 0 }}><table className="cs-table"><thead><tr><th>USER</th><th>DEPARTMENT</th><th>ROLE</th><th>STATUS</th><th style={{ textAlign: 'right' }}>ACTIONS</th></tr></thead><tbody>
-          {users.map((user) => (
-            <tr key={user.id}>
-              <td style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold' }}>{user.name[0]}</div>
-                <div><div style={{ fontWeight: '500' }}>{user.name}</div><div style={{ fontSize: '12px', color: '#64748b' }}>{user.email}</div></div>
-              </td>
-              <td style={{ color: '#64748b' }}>{user.dept}</td>
-              <td><div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#475569' }}><Shield size={14} color="#94a3b8"/> {user.role}</div></td>
-              <td><span className={`cs-badge ${getStatusClass(user.status)}`}>{user.status}</span></td>
-              <td style={{ textAlign: 'right' }}>
-                <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-                  <Pencil size={16} color="#64748b" style={{ cursor: 'pointer' }} title="Edit" onClick={() => startEditUser(user)} />
-                  <Trash2 size={16} color="#ef4444" style={{ cursor: 'pointer' }} title="Remove" onClick={() => deleteUser(user.id)} />
-                </div>
-              </td>
-            </tr>
-          ))}</tbody></table></div>
+      </div>
+
+      {/* Directory Table Card */}
+      <div className="cs-card" style={{ padding: 0, overflow: 'hidden' }}>
+        <div className="cs-table-wrapper" style={{ margin: 0 }}>
+          <table className="cs-table">
+            <thead>
+              <tr>
+                <th>USER</th>
+                <th>DEPARTMENT</th>
+                <th>ROLE</th>
+                <th>STATUS</th>
+                <th style={{ textAlign: 'right' }}>ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.map((user) => (
+                <tr key={user.id}>
+                  <td style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold' }}>{user.name[0]}</div>
+                    <div><div style={{ fontWeight: '500' }}>{user.name}</div><div style={{ fontSize: '12px', color: '#64748b' }}>{user.email}</div></div>
+                  </td>
+                  <td style={{ color: '#64748b' }}>{user.dept}</td>
+                  <td><div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#475569' }}><Shield size={14} color="#94a3b8"/> {user.role}</div></td>
+                  <td><span className={`cs-badge ${getStatusClass(user.status)}`}>{user.status}</span></td>
+                  <td style={{ textAlign: 'right' }}>
+                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                      <Pencil size={16} color="#64748b" style={{ cursor: 'pointer' }} title="Edit" onClick={() => startEditUser(user)} />
+                      <Trash2 size={16} color="#ef4444" style={{ cursor: 'pointer' }} title="Remove" onClick={() => deleteUser(user.id)} />
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
@@ -362,14 +391,40 @@ END OF LOG
           <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}><button style={saveBtnStyle} onClick={saveDocument}>Save</button><button style={cancelBtnStyle} onClick={() => setIsDocModalOpen(false)}>Cancel</button></div>
         </div>
       )}
+
+      {/* Updated Header Part to match Features Tab */}
       <div className="cs-card">
-        <div className="cs-card-header" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '16px', alignItems: 'center' }}><div><h2>Operational Documents</h2><p style={{ margin: '4px 0 0 0', fontSize: '14px', color: '#64748b' }}>Manage certifications and permits.</p></div><button className="cs-btn cs-btn-outline" onClick={() => setIsDocModalOpen(true)}><Plus size={16} /> Add Document</button></div>
-        <div className="cs-comp-list">{docsList.map((doc) => {
+        <div className="cs-card-header" style={{ alignItems: 'center' }}>
+          <div>
+            <h2>Operational Documents</h2>
+            <p style={{ margin: '4px 0 0 0', fontSize: '14px', color: '#64748b' }}>Manage certifications and permits.</p>
+          </div>
+          <button className="cs-btn cs-btn-outline" onClick={() => setIsDocModalOpen(true)}>
+            <Plus size={16} /> Add Document
+          </button>
+        </div>
+      </div>
+
+      <div className="cs-card">
+        <div className="cs-comp-list">
+          {docsList.map((doc) => {
             const status = getDocStatus(doc.expiry);
             return (
               <div key={doc.id} className="cs-comp-item">
-                <div className="cs-comp-info"><div className="cs-comp-icon"><FileText color="#0f172a" /></div><div><div style={{ fontSize: '14px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px' }}>{doc.name} <Pencil size={12} color="#94a3b8" style={{ cursor: 'pointer' }} onClick={() => renameDoc(doc.id)} /></div><div style={{ fontSize: '12px', color: '#64748b' }}>Exp: {displayDate(doc.expiry)}</div></div></div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}><span className={`cs-badge ${status.class}`} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{status.icon} {status.label}</span>
+                <div className="cs-comp-info">
+                  <div className="cs-comp-icon"><FileText color="#0f172a" /></div>
+                  <div>
+                    <div style={{ fontSize: '14px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      {doc.name} 
+                      <Pencil size={12} color="#94a3b8" style={{ cursor: 'pointer' }} onClick={() => renameDoc(doc.id)} />
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#64748b' }}>Exp: {displayDate(doc.expiry)}</div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <span className={`cs-badge ${status.class}`} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    {status.icon} {status.label}
+                  </span>
                   <div style={{ display: 'flex', gap: '8px' }}>
                     <button className="cs-btn cs-btn-outline" style={{ padding: '6px' }} onClick={() => alert(`Opening: ${doc.name}`)}><Eye size={16} /></button>
                     <button className="cs-btn cs-btn-outline" style={{ padding: '6px' }} onClick={() => deleteDoc(doc.id)}><Trash2 size={16} color="#ef4444" /></button>
@@ -377,11 +432,11 @@ END OF LOG
                 </div>
               </div>
             );
-          })}</div>
+          })}
+        </div>
       </div>
     </div>
   );
-
   return (
     <div className="cs-wrapper">
       <div className="cs-header" style={{ alignItems: 'flex-start' }}><h3 style={{ margin: 0, fontSize: '1.5rem', lineHeight: '2rem', fontWeight: '700', color: '#1e293b' }}>System Settings</h3><div className="cs-actions" style={{ marginTop: '2px' }}><button className="cs-btn cs-btn-outline" onClick={handleExportLogs}><Upload size={16} /> Export Logs</button></div></div>
