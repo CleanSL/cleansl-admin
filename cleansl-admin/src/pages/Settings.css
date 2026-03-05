@@ -1,0 +1,108 @@
+/* Settings.css */
+
+.cs-wrapper, .cs-wrapper * {
+  box-sizing: border-box;
+}
+
+.cs-wrapper {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #0f172a;
+  width: 100%;
+  overflow-x: hidden; 
+}
+
+/* Header */
+.cs-header { 
+  display: flex; justify-content: space-between; align-items: flex-start; 
+  margin-top: 0; margin-bottom: 24px; gap: 16px; width: 100%;
+}
+.cs-title h1 { margin: 0; font-size: 1.5rem; line-height: 2rem; font-weight: 700; color: #1e293b; }
+.cs-title p { margin: 4px 0 0 0; font-size: 0.875rem; color: #64748b; }
+
+.cs-actions { display: flex; gap: 12px; }
+.cs-btn { display: flex; align-items: center; gap: 8px; padding: 8px 16px; font-size: 14px; font-weight: 500; border-radius: 8px; cursor: pointer; border: none; }
+.cs-btn-outline { background: #fff; border: 1px solid #e2e8f0; color: #0f172a; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: all 0.2s; }
+.cs-btn-outline:hover { background: #f8fafc; }
+
+/* Removed Green: Now sleek black/slate */
+.cs-btn-solid { background: #0f172a; color: #fff; transition: all 0.2s; } 
+.cs-btn-solid:hover { background: #1e293b; }
+
+/* Tabs */
+.cs-tabs-container { display: flex; gap: 8px; margin-bottom: 24px; overflow-x: auto; max-width: 100%; }
+.cs-tabs-container::-webkit-scrollbar { display: none; }
+.cs-tab { display: flex; align-items: center; gap: 8px; padding: 8px 16px; font-size: 14px; font-weight: 500; border-radius: 8px; cursor: pointer; border: 1px solid transparent; background: transparent; color: #64748b; transition: all 0.2s; white-space: nowrap; }
+.cs-tab.active { background: #fff; color: #0f172a; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+
+/* Layout */
+.cs-col { display: flex; flex-direction: column; gap: 24px; width: 100%; }
+
+/* Cards */
+.cs-card-header { display: flex; justify-content: space-between; align-items: flex-start; width: 100%; }
+.cs-card-header h2 { margin: 0; font-size: 16px; font-weight: 600; color: #0f172a; }
+.cs-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; position: relative; box-shadow: 0 1px 3px rgba(0,0,0,0.05); width: 100%; }
+.cs-edit-icon { position: absolute; top: 20px; right: 20px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px; cursor: pointer; color: #64748b; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+.cs-edit-icon:hover { background: #f8fafc; color: #0f172a; }
+
+/* Grid */
+.cs-info-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px 16px; margin-top: 16px; width: 100%; }
+.cs-info-item { display: flex; flex-direction: column; min-width: 0; }
+.cs-info-item label { font-size: 12px; font-weight: 600; color: #0f172a; margin-bottom: 6px; }
+.cs-info-item span { display: flex; align-items: flex-start; gap: 8px; font-size: 14px; color: #64748b; overflow-wrap: break-word; word-wrap: break-word; }
+.cs-info-item svg { width: 16px; height: 16px; color: #94a3b8; flex-shrink: 0; margin-top: 2px; }
+
+/* Collection Shifts - Removed Green */
+.cs-billing-freq { display: flex; gap: 12px; margin-top: 16px; width: 100%; flex-wrap: wrap; }
+.cs-freq-box { padding: 10px 16px; display: flex; align-items: center; justify-content: center; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 14px; font-weight: 600; color: #0f172a; }
+
+/* Users Tab - Removed Green Badges */
+.cs-table-wrapper { margin-top: 16px; width: 100%; }
+.cs-table { width: 100%; border-collapse: collapse; text-align: left; }
+.cs-table th { padding: 12px 16px; font-size: 12px; font-weight: 600; color: #64748b; border-bottom: 1px solid #e2e8f0; background: #f8fafc; white-space: nowrap; }
+.cs-table td { padding: 16px; border-bottom: 1px solid #e2e8f0; font-size: 14px; color: #0f172a; }
+.cs-badge { padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 500; }
+.cs-badge.active { background: #f1f5f9; color: #0f172a; border: 1px solid #e2e8f0; }
+.cs-badge.pending { background: #fef3c7; color: #92400e; }
+
+/* Integrations Tab */
+.cs-integ-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; width: 100%; }
+.cs-integ-header { display: flex; justify-content: space-between; margin-bottom: 16px; width: 100%;}
+.cs-integ-icon { width: 48px; height: 48px; border-radius: 12px; background: #f8fafc; display: flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0; }
+.cs-integ-card h3 { font-size: 16px; font-weight: 600; margin: 0 0 8px 0; }
+.cs-integ-card p { font-size: 14px; color: #64748b; margin: 0 0 16px 0; line-height: 1.5; }
+.cs-integ-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 16px; border-top: 1px solid #e2e8f0; width: 100%; }
+
+/* Compliance Tab */
+.cs-comp-list { display: flex; flex-direction: column; gap: 16px; margin-top: 16px; width: 100%; }
+.cs-comp-item { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; width: 100%;}
+.cs-comp-info { display: flex; align-items: center; gap: 16px; }
+.cs-comp-icon { width: 40px; height: 40px; background: #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0; flex-shrink: 0; }
+
+/* Update the existing pending class to include a border */
+.cs-badge.pending {
+    background: #fffbeb;
+    color: #d97706;
+    border: 1px solid #fef3c7; /* This adds the border you're missing */
+}
+
+/* For comparison, ensure your others look like this: */
+.cs-badge.active {
+    background: #ecfdf5;
+    color: #059669;
+    border: 1px solid #d1fae5;
+}
+
+.cs-badge.suspended {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fee2e2;
+}
+
+.cs-badge.fired {
+    background: #fff7ed;
+    color: #ea580c;
+    border: 1px solid #ffedd5;
+}
+@media (max-width: 1024px) {
+  .cs-info-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
