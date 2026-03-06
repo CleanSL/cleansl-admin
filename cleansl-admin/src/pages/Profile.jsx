@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   User, Mail, Phone, MapPin, Building2, ShieldCheck, 
   Globe, CheckCircle2, Edit3, Clock, Key, Smartphone, 
-  LogOut, ShieldAlert, Upload, HardDrive, Save, X, Check
+  ShieldAlert, Upload, HardDrive, Save, X, Check
 } from 'lucide-react';
 import './Settings.css'; 
 import './Profile.css';  

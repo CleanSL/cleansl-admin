@@ -6,6 +6,7 @@ import FleetStatus from './pages/FleetStatus';
 import Analytics from './pages/Analytics';
 import Settings from './pages/Settings';
 import Profile from './pages/Profile';
+import Violations from './pages/Violations';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
           <Route index element={<Overview />} />
           <Route path="live-map" element={<LiveMap />} />
           <Route path="complaints" element={<Complaints />} />
+          <Route path="violations" element={<Violations />} />
           <Route path="fleet" element={<FleetStatus />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="settings" element={<Settings />} />

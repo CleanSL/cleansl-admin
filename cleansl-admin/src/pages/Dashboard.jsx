@@ -58,6 +58,7 @@ const Dashboard = () => {
           <NavItem icon={<LayoutDashboard size={20} />} label="Overview" to="/" active={isOverview} />
           <NavItem icon={<MapIcon size={20} />} label="Live Map" to="/live-map" />
           <NavItem icon={<AlertCircle size={20} />} label="Complaints" to="/complaints" />
+          <NavItem icon={<AlertCircle size={20} />} label="Violations" to="/violations" />
           <NavItem icon={<Truck size={20} />} label="Fleet Status" to="/fleet" />
           <NavItem icon={<BarChart3 size={20} />} label="Analytics" to="/analytics" />
         </nav>

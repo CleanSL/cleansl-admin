@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import './Settings.css';
 import { 
   Upload, Plus, Building2, Users, Link as LinkIcon, FileText, 
-  Phone, Calendar, Mail, Clock, Shield, MapPin, Truck,
-  MoreVertical, ToggleRight, ToggleLeft, FileCheck, AlertCircle,
-  Radio, Map, MessageSquare, Pencil, X, CheckCircle2, Trash2,
-  UserMinus, Plane, Ban, Eye, FileWarning, User
+  Phone, Calendar, Mail, Shield, Truck, MapPin,
+  ToggleRight, ToggleLeft, FileCheck, AlertCircle,
+  Radio, Pencil, X, CheckCircle2, Trash2,
+  Eye, FileWarning, User
 } from 'lucide-react';
 
 export default function Settings() {
