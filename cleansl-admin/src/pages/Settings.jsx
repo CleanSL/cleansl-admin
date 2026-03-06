@@ -1,16 +1,18 @@
 import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Settings.css';
 import { 
   Upload, Plus, Building2, Users, Link as LinkIcon, FileText, 
-  Phone, Calendar, Mail, Clock, Shield, MapPin, Truck,
-  MoreVertical, ToggleRight, ToggleLeft, FileCheck, AlertCircle,
-  Radio, Map, MessageSquare, Pencil, X, CheckCircle2, Trash2,
-  UserMinus, Plane, Ban, Eye, FileWarning
+  Phone, Calendar, Mail, Shield, Truck, MapPin,
+  ToggleRight, ToggleLeft, FileCheck, AlertCircle,
+  Radio, Pencil, X, CheckCircle2, Trash2,
+  Eye, FileWarning, User
 } from 'lucide-react';
 
 export default function Settings() {
   const [activeTab, setActiveTab] = useState('Organization');
   const fileInputRef = useRef(null);
+  const navigate = useNavigate();
 
   // --- UNIVERSAL LOGIC ---
   const getCouncilMetrics = (name) => {
@@ -439,7 +441,19 @@ END OF LOG
   );
   return (
     <div className="cs-wrapper">
-      <div className="cs-header" style={{ alignItems: 'flex-start' }}><h3 style={{ margin: 0, fontSize: '1.5rem', lineHeight: '2rem', fontWeight: '700', color: '#1e293b' }}>System Settings</h3><div className="cs-actions" style={{ marginTop: '2px' }}><button className="cs-btn cs-btn-outline" onClick={handleExportLogs}><Upload size={16} /> Export Logs</button></div></div>
+      <div className="cs-header" style={{ alignItems: 'flex-start' }}>
+        <h3 style={{ margin: 0, fontSize: '1.5rem', lineHeight: '2rem', fontWeight: '700', color: '#1e293b' }}>
+          System Settings
+        </h3>
+        <div className="cs-actions" style={{ marginTop: '2px' }}>
+          <button className="cs-btn cs-btn-outline" onClick={() => navigate('/profile')}>
+            <User size={16} /> View Profile
+          </button>
+          <button className="cs-btn cs-btn-outline" onClick={handleExportLogs}>
+            <Upload size={16} /> Export Logs
+          </button>
+        </div>
+      </div>
       <div className="cs-tabs-container">{[{ id: 'Organization', icon: Building2 }, { id: 'User & Permissions', icon: Users }, { id: 'Features', icon: LinkIcon }, { id: 'Documents', icon: FileText }].map((tab) => (
         <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`cs-tab ${activeTab === tab.id ? 'active' : ''}`}><tab.icon size={16} /> {tab.id}</button>
       ))}</div>

@@ -49,3 +49,27 @@ export const MAP_CONFIG = {
   center: [6.9145, 79.8650],
   zoom: 16
 };
+
+// violation data for violations page
+export const VIOLATION_STATS = [
+  { label: "Total Violations", value: "124", color: "text-red-600", trend: "+12%" },
+  { label: "Pending Review", value: "28", color: "text-orange-600", trend: "-3%" },
+  { label: "Confirmed", value: "67", color: "text-red-600", trend: "+5%" },
+  { label: "Resolved", value: "29", color: "text-green-600", trend: "+8%" }
+];
+
+export const VIOLATIONS_TABLE = [
+  { date: "2025-11-21", type: "Unsorted Waste", resident: "No. 15, Flower Rd", status: "Pending", score: "92" },
+  { date: "2025-11-20", type: "Hazardous Waste", resident: "No. 22, Galle Rd", status: "Disputed", score: "87" },
+  { date: "2025-11-19", type: "Unsorted Waste", resident: "No. 8, Rosmead Pl", status: "Confirmed", score: "95" },
+  { date: "2025-11-18", type: "Mixed Waste", resident: "No. 45, Baudhaloka Mw", status: "Resolved", score: "89" },
+  { date: "2025-11-17", type: "Unsorted Waste", resident: "No. 33, Duplication Rd", status: "Pending", score: "91" }
+];
+
+export const VIOLATION_LOCATIONS = [
+  [6.9145, 79.8650],
+  [6.9160, 79.8680],
+  [6.9120, 79.8750],
+  [6.9080, 79.8700],
+  [6.9100, 79.8620]
+];

@@ -103,6 +103,31 @@
     color: #ea580c;
     border: 1px solid #ffedd5;
 }
+
+/* Missing button styles */
+.cs-btn-dark { background: #0f172a; color: #fff; transition: all 0.2s; }
+.cs-btn-dark:hover { background: #1e293b; }
+.cs-btn-text { background: none; border: none; color: #64748b; cursor: pointer; font-weight: 500; transition: all 0.2s; }
+.cs-btn-text:hover { color: #0f172a; }
+
+/* Missing input styles */
+.cs-edit-input {
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #0f172a;
+  outline: none;
+  background-color: #f8fafc;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+.cs-edit-input:focus {
+  border-color: #0f172a;
+  background-color: #fff;
+}
+
 @media (max-width: 1024px) {
   .cs-info-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
