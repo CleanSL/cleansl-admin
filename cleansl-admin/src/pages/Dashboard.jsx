@@ -211,7 +211,7 @@ const Dashboard = () => {
           )}
           {activePage === "settings" && <Settings />}
           {activePage === "profile" && <Profile />}
-          
+          {activePage === "driverlogs" && <DriverLogs />}
         </section>
       </main>
     </div>
