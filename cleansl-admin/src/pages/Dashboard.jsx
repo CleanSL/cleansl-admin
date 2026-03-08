@@ -5,6 +5,7 @@ import NavItem from '../components/NavItem';
 import { MOCK_STATS, MOCK_COMPLAINTS, MOCK_OPERATIONS } from '../data/mockData';
 import Settings from "./Settings";
 import Profile from "./Profile";
+import DriverLogs from "./DriverLogs";
 
 
 const Dashboard = () => {
@@ -43,7 +44,9 @@ const Dashboard = () => {
           <NavItem icon={<LayoutDashboard size={20} />} label="Overview" active={activePage === "overview"} />
           <NavItem icon={<MapIcon size={20} />} label="Live Map" />
           <NavItem icon={<AlertCircle size={20} />} label="Complaints" />
-          <NavItem icon={<Truck size={20} />} label="Fleet Status" />
+        <div onClick={() => setActivePage("driverlogs")}>
+          <NavItem icon={<Truck size={20} />} label="Driver Logs" active={activePage === "driverlogs"} />
+        </div>
           <NavItem icon={<BarChart3 size={20} />} label="Analytics" />
         </nav>
         <div 
@@ -208,6 +211,7 @@ const Dashboard = () => {
           )}
           {activePage === "settings" && <Settings />}
           {activePage === "profile" && <Profile />}
+          
         </section>
       </main>
     </div>

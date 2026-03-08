@@ -175,7 +175,7 @@ export default function Profile() {
 
   return (
     <div className="cs-wrapper">
-      {/* Updated Header Section */}
+      {/* Header Section */}
       <div className="cs-header" style={{ alignItems: 'flex-start', marginBottom: '32px' }}>
         <div>
           <h1 style={{ margin: 0, fontSize: '1.60rem', fontWeight: '700', color: '#0f172a' }}>Profile</h1>
