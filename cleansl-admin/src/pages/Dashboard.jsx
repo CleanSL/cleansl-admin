@@ -1,247 +1,142 @@
 import React, { useState, useMemo } from 'react';
-import StatCard from '../components/StatCard';
+import { Outlet, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Truck, AlertCircle, Map as MapIcon, Settings as SettingsIcon, BarChart3 } from 'lucide-react';
 import NavItem from '../components/NavItem';
 import { MOCK_STATS, MOCK_COMPLAINTS, MOCK_OPERATIONS } from '../data/mockData';
 import Settings from "./Settings";
 import Profile from "./Profile";
-import DriverLogs from "./DriverLogs";
 
 
 const Dashboard = () => {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('all');
-  const [activePage, setActivePage] = useState('overview');
+  const location = useLocation();
 
+  // Logic from Aakif: Filter the live feed based on search and buttons
   const filteredOperations = useMemo(() => {
     const q = (query || '').trim().toLowerCase();
     return MOCK_OPERATIONS.filter((op) => {
-      // filter by button
       if (filter === 'pickups') {
-        const isPickup = (op.event && op.event.toLowerCase().includes('pickup')) || (op.detail && op.detail.toLowerCase().includes('pickup'));
+        const isPickup = op.event?.toLowerCase().includes('pickup') || op.detail?.toLowerCase().includes('pickup');
         if (!isPickup) return false;
       } else if (filter === 'violations') {
-        const isViolation = (op.event && op.event.toLowerCase().includes('violation')) || (op.detail && op.detail.toLowerCase().includes('violation')) || (op.status && op.status.toLowerCase().includes('violation'));
+        const isViolation = op.event?.toLowerCase().includes('violation') || op.detail?.toLowerCase().includes('violation') || op.status?.toLowerCase().includes('violation');
         if (!isViolation) return false;
       }
-
-      // search query across event/detail/status/time
       if (!q) return true;
       const hay = [op.event, op.detail, op.status, op.time].filter(Boolean).join(' ').toLowerCase();
       return hay.includes(q);
     });
   }, [query, filter]);
 
+  // Determine if we are on the main overview page
+  const isOverview = location.pathname === '/' || location.pathname === '/overview';
+
   return (
     <div className="flex h-screen bg-slate-50 font-sans">
-      {/* SIDEBAR */}
+      {/* SIDEBAR - Merged NavItems */}
       <aside className="w-64 bg-slate-900 text-white flex flex-col">
         <div className="p-6">
-          <h1 className="text-2xl font-bold text-green-400">CleanSL</h1>
-          <p className="text-xs text-slate-400">Admin Dashboard Center</p>
+          <h1 className="text-2xl font-bold text-green-400 tracking-tighter">CleanSL</h1>
+          <p className="text-xs text-slate-400 uppercase tracking-widest font-semibold mt-1">Admin Center</p>
         </div>
         <nav className="flex-1 px-4 space-y-2">
           <NavItem icon={<LayoutDashboard size={20} />} label="Overview" active={activePage === "overview"} />
           <NavItem icon={<MapIcon size={20} />} label="Live Map" />
           <NavItem icon={<AlertCircle size={20} />} label="Complaints" />
-        <div onClick={() => setActivePage("driverlogs")}>
-          <NavItem icon={<Truck size={20} />} label="Driver Logs" active={activePage === "driverlogs"} />
-        </div>
+          <NavItem icon={<Truck size={20} />} label="Fleet Status" />
           <NavItem icon={<BarChart3 size={20} />} label="Analytics" />
         </nav>
-        <div 
-          className="p-4 border-t border-slate-800"
-          onClick={() => setActivePage('settings')}
-        >
-          <NavItem icon={<SettingsIcon size={20} />} label="Settings"  active={activePage === 'settings'} />
-          
+        <div className="p-4 border-t border-slate-800">
+          <NavItem icon={<SettingsIcon size={20} />} label="Settings" to="/settings" />
         </div>
       </aside>
 
-      {/* MAIN CONTENT */}
+      {/* MAIN CONTENT AREA */}
       <main className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8">
-          <h2 className="text-lg font-semibold text-slate-700">Good Morning, User</h2>
-          <div className="flex items-center gap-4 cursor-pointer" onClick={() => setActivePage('profile')}>
-            <div className="text-right">
-              <p className="text-sm font-medium">CMC Supervisor</p>
-              <p className="text-xs text-slate-500 text-green-500">System Online</p>
+        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 shrink-0">
+          <h2 className="text-lg font-bold text-slate-700">Good Morning, Admin</h2>
+          <div className="flex items-center gap-4">
+            <div className="text-right hidden sm:block">
+              <p className="text-sm font-black text-slate-800">CMC Supervisor</p>
+              <p className="text-[10px] text-green-500 font-bold uppercase tracking-tighter italic">System Online</p>
             </div>
-            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-700 font-bold">CMC</div>
+            <div className="w-10 h-10 bg-green-100 rounded-2xl flex items-center justify-center text-green-700 font-black shadow-sm border border-green-200">
+              CMC
+            </div>
           </div>
         </header>
 
-        <section className="flex-1 overflow-y-auto p-8">
-
-          {activePage === "overview" && (
+        <section className="flex-1 overflow-y-auto p-8 bg-[#FDFCF0]/50">
+          {/* If we are at the root, show the Overview content from Aakif's code */}
+          {isOverview ? (
             <>
-          <h3 className="text-2xl font-bold text-slate-800 mb-6">City Overview</h3>
-          
-          {/* DYNAMIC STAT CARDS - Linked to mockData.js */}
-          <div className="flex flex-row gap-6 mb-10 items-stretch">
-            <div style={{flex: '1 1 240px'}}>
-              <StatCard
-                title="Total Pickups"
-                value={MOCK_STATS.totalPickups.toLocaleString()}
-                trend="+12%"
-                icon={<Truck size={20} />}
-              />
-            </div>
-            <div style={{flex: '1 1 240px'}}>
-              <StatCard
-                title="Missed Pickups"
-                value={MOCK_STATS.missedPickups}
-                trend="-2%"
-                isNegative={true}
-                icon={<AlertCircle size={20} />}
-              />
-            </div>
-            <div style={{flex: '1 1 240px'}}>
-              <StatCard
-                title="Active Trucks"
-                value={MOCK_STATS.activeTrucks}
-                trend="Steady"
-                icon={<Truck size={20} />}
-              />
-            </div>
-            <div style={{flex: '1 1 240px'}}>
-              <StatCard
-                title="New Complaints"
-                value={MOCK_STATS.newComplaints}
-                trend="+1"
-                isNegative={true}
-                icon={<AlertCircle size={20} />}
-              />
-            </div>
-          </div>
+              <h3 className="text-2xl font-black text-slate-800 mb-8 tracking-tight">City Overview</h3>
+              
+              {/* Dynamic Stat Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+                <StatCard title="Total Pickups" value={MOCK_STATS.totalPickups.toLocaleString()} trend="+12%" icon={<Truck size={20} />} />
+                <StatCard title="Missed Pickups" value={MOCK_STATS.missedPickups} trend="-2%" isNegative={true} icon={<AlertCircle size={20} />} />
+                <StatCard title="Active Trucks" value={MOCK_STATS.activeTrucks} trend="Steady" icon={<Truck size={20} />} />
+                <StatCard title="New Complaints" value={MOCK_STATS.newComplaints} trend="+1" isNegative={true} icon={<AlertCircle size={20} />} />
+              </div>
 
-          <br></br>
-          {/* LIVE FEED */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden w-full">
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center">
-              <div className="flex-1">
-                <h4 className="font-bold text-slate-800">Live Operations Feed</h4>
-              </div>
-              <div className="flex-1 flex justify-center">
-                <input
-                  placeholder="Search"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  className="w-2/3 md:w-1/2 bg-slate-50 text-sm rounded-full px-4 py-2 text-slate-600"
-                  style={{ border: 'none', outline: 'none', boxShadow: 'none' }}
-                  onFocus={(e) => { e.target.style.outline = 'none'; e.target.style.boxShadow = 'none'; }}
-                />
-              </div>
-              <div className="flex-1 flex justify-end items-center gap-6 text-slate-600 text-sm">
-                <nav className="flex items-center gap-4">
-                  <button
-                    type="button"
-                    onClick={() => setFilter('all')}
-                    className={`px-4 py-1 rounded-md text-sm font-medium transition ${filter === 'all' ? 'bg-slate-100 text-slate-700' : 'text-slate-500'}`}
-                    style={{ border: 'none', outline: 'none', boxShadow: 'none' }}
-                    onFocus={(e) => { e.currentTarget.style.outline = 'none'; e.currentTarget.style.boxShadow = 'none'; }}
-                  >
-                    All Activities
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setFilter('pickups')}
-                    className={`px-4 py-1 rounded-md text-sm font-medium transition ${filter === 'pickups' ? 'bg-slate-100 text-slate-700' : 'text-slate-500'}`}
-                    style={{ border: 'none', outline: 'none', boxShadow: 'none' }}
-                    onFocus={(e) => { e.currentTarget.style.outline = 'none'; e.currentTarget.style.boxShadow = 'none'; }}
-                  >
-                    Pickups
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setFilter('violations')}
-                    className={`px-4 py-1 rounded-md text-sm font-medium transition ${filter === 'violations' ? 'bg-slate-100 text-slate-700' : 'text-slate-500'}`}
-                    style={{ border: 'none', outline: 'none', boxShadow: 'none' }}
-                    onFocus={(e) => { e.currentTarget.style.outline = 'none'; e.currentTarget.style.boxShadow = 'none'; }}
-                  >
-                    Violations
-                  </button>
-                </nav>
-              </div>
-            </div>
+              {/* Live Operations Feed Table */}
+              <div className="bg-white rounded-[32px] shadow-sm border border-slate-100 overflow-hidden">
+                <div className="px-8 py-6 border-b border-slate-50 flex flex-col md:flex-row items-center gap-4">
+                  <h4 className="font-black text-slate-800 flex-1 uppercase tracking-tight">Live Operations Feed</h4>
+                  <div className="flex bg-slate-100 p-1 rounded-xl gap-1">
+                    {['all', 'pickups', 'violations'].map((f) => (
+                      <button
+                        key={f}
+                        onClick={() => setFilter(f)}
+                        className={`px-4 py-1.5 rounded-lg text-xs font-bold uppercase transition-all ${filter === f ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                      >
+                        {f}
+                      </button>
+                    ))}
+                  </div>
+                  <input
+                    placeholder="Search feed..."
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    className="w-full md:w-64 bg-slate-50 border border-slate-100 text-sm rounded-xl px-4 py-2 focus:ring-2 focus:ring-green-400 outline-none transition-all"
+                  />
+                </div>
 
-            <div className="p-4 overflow-x-auto">
-                <table className="w-full table-fixed text-left border-collapse">
-                <colgroup>
-                  <col style={{ width: '6%' }} />
-                  <col style={{ width: '18%' }} />
-                  <col style={{ width: '48%' }} />
-                  <col style={{ width: '12%' }} />
-                  <col style={{ width: '16%' }} />
-                </colgroup>
-                <thead className="bg-slate-50 text-slate-500 text-xs uppercase font-semibold">
-                  <tr>
-                    <th className="px-4 py-4">Num.</th>
-                    <th className="px-4 py-4">Event</th>
-                    <th className="px-4 py-4">Source / Detail</th>
-                    <th className="px-4 py-4">Time</th>
-                    <th className="px-4 py-4">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredOperations.length === 0 ? (
-                    <tr>
-                      <td className="px-4 py-6 text-center text-slate-400" colSpan={5}>
-                        No results
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredOperations.map((op, idx) => (
-                      <FeedRow
-                        key={op.id || idx}
-                        num={idx + 1}
-                        event={op.event}
-                        detail={op.detail}
-                        time={op.time}
-                        status={op.status}
-                        color={op.color}
-                      />
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                <div className="overflow-x-auto p-2">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="text-slate-400 text-[10px] uppercase font-black tracking-widest border-b border-slate-50">
+                        <th className="px-6 py-4 w-16">#</th>
+                        <th className="px-6 py-4">Event Type</th>
+                        <th className="px-6 py-4">Detail Information</th>
+                        <th className="px-6 py-4">Time</th>
+                        <th className="px-6 py-4">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredOperations.length === 0 ? (
+                        <tr><td colSpan={5} className="px-6 py-12 text-center text-slate-400 font-medium italic">No operational data matches your search...</td></tr>
+                      ) : (
+                        filteredOperations.map((op, idx) => (
+                          <FeedRow key={op.id || idx} num={idx + 1} {...op} />
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </>
+          ) : (
+            /* Otherwise, render the child page (LiveMap, Complaints, etc.) */
+            <Outlet />
           )}
           {activePage === "settings" && <Settings />}
           {activePage === "profile" && <Profile />}
-          
         </section>
       </main>
     </div>
-  );
-};
-
-const FeedRow = ({ num, event, detail, time, status, color }) => {
-  const colorMap = {
-    blue: { bg: '#EFF6FF', text: '#1E40AF' },
-    green: { bg: '#ECFDF5', text: '#065F46' },
-    red: { bg: '#FEF2F2', text: '#991B1B' },
-    amber: { bg: '#FFFBEB', text: '#92400E' },
-    yellow: { bg: '#FFFBEB', text: '#92400E' },
-    default: { bg: '#F8FAFC', text: '#334155' }
-  };
-
-  const { bg, text } = colorMap[color] || colorMap.default;
-
-  return (
-    <tr className="bg-white hover:bg-slate-50 transition-colors rounded-md">
-      <td className="px-4 py-4 font-medium text-slate-800">{num}</td>
-      <td className="px-4 py-4 font-medium text-slate-800">{event}</td>
-      <td className="px-4 py-4 text-slate-500 text-sm">{detail}</td>
-      <td className="px-4 py-4 text-slate-400 text-sm">{time}</td>
-      <td className="px-4 py-4">
-        <span className="px-2 py-1 rounded-md text-xs font-bold uppercase" style={{ backgroundColor: bg, color: text }}>
-          {status}
-        </span>
-      </td>
-    </tr>
   );
 };
 
