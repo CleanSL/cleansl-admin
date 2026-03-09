@@ -73,3 +73,58 @@ export const VIOLATION_LOCATIONS = [
   [6.9080, 79.8700],
   [6.9100, 79.8620]
 ];
+
+
+export const COMPLAINT_STATS = [
+  { label: "Total Complaints", value: 5, icon: "📋" },
+  { label: "Pending", value: 1, icon: "🕒", color: "text-orange-500" },
+  { label: "In Progress", value: 2, icon: "⚙️", color: "text-blue-500" },
+  { label: "Resolved", value: 1, icon: "✅", color: "text-green-500" },
+];
+
+export const COMPLAINTS_LIST = [
+  {
+    id: "COMP-001",
+    title: "Missed Pickup Schedule",
+    priority: "High",
+    description: "My scheduled waste pickup was missed yesterday. No notification was provided.",
+    customer: "Vinusha Ranasinghe",
+    category: "Pickup Service",
+    date: "2024-11-28",
+    status: "Pending",
+    assignedTo: null
+  },
+  {
+    id: "COMP-002",
+    title: "Damaged Bin Not Replaced",
+    priority: "Medium",
+    description: "Reported damaged waste bin 2 weeks ago but no replacement received yet.",
+    customer: "Nick Fury",
+    category: "Equipment",
+    date: "2024-11-25",
+    status: "In Progress",
+    assignedTo: "Vijay Sethupathi"
+  },
+  {
+    id: "COMP-003",
+    title: "Overflowing Communal Bin",
+    priority: "Critical",
+    description: "The communal waste bin at Block 123 has been overflowing for 3 days.",
+    customer: "Aakif Saroose",
+    category: "Collection Issue",
+    date: "2024-11-27",
+    status: "In Progress",
+    assignedTo: "Bruce Banner"
+  },
+  {
+    id: "COMP-004",
+    title: "Billing Discrepancy",
+    priority: "Medium",
+    description: "I was charged twice for the same service period. Please review my account.",
+    customer: "Harish Prasanna",
+    category: "Billing",
+    date: "2024-11-22",
+    status: "Resolved",
+    assignedTo: "Nathath Team"
+  }
+];
