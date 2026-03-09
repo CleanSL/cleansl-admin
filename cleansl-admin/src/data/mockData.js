@@ -73,3 +73,92 @@ export const VIOLATION_LOCATIONS = [
   [6.9080, 79.8700],
   [6.9100, 79.8620]
 ];
+
+
+export const COMPLAINT_STATS = [
+  { label: "Total Complaints", value: 5, icon: "📋" },
+  { label: "Pending", value: 1, icon: "🕒", color: "text-orange-500" },
+  { label: "In Progress", value: 2, icon: "⚙️", color: "text-blue-500" },
+  { label: "Resolved", value: 1, icon: "✅", color: "text-green-500" },
+];
+
+export const COMPLAINTS_LIST = [
+  {
+    id: "COMP-001",
+    title: "Missed Pickup Schedule",
+    priority: "High",
+    description: "My scheduled waste pickup was missed yesterday. No notification was provided.",
+    customer: "Vinusha Ranasinghe",
+    category: "Pickup Service",
+    date: "2024-11-28",
+    status: "Pending",
+    assignedTo: null
+  },
+  {
+    id: "COMP-002",
+    title: "Damaged Bin Not Replaced",
+    priority: "Medium",
+    description: "Reported damaged waste bin 2 weeks ago but no replacement received yet.",
+    customer: "Nick Fury",
+    category: "Equipment",
+    date: "2024-11-25",
+    status: "In Progress",
+    assignedTo: "Vijay Sethupathi"
+  },
+  {
+    id: "COMP-003",
+    title: "Overflowing Communal Bin",
+    priority: "Critical",
+    description: "The communal waste bin at Block 123 has been overflowing for 3 days.",
+    customer: "Aakif Saroose",
+    category: "Collection Issue",
+    date: "2024-11-27",
+    status: "In Progress",
+    assignedTo: "Bruce Banner"
+  },
+  {
+    id: "COMP-004",
+    title: "Billing Discrepancy",
+    priority: "Medium",
+    description: "I was charged twice for the same service period. Please review my account.",
+    customer: "Harish Prasanna",
+    category: "Billing",
+    date: "2024-11-22",
+    status: "Resolved",
+    assignedTo: "Nathath Team"
+  }
+];
+
+export const ANALYTICS_TOTALS = {
+  waste: { value: "4.8 tons", trend: "+8.2%" },
+  pickups: { value: "234", trend: "+12.1%" },
+  users: { value: "1,264", trend: "+3.1%" }
+};
+
+export const MONTHLY_TRENDS = [
+  { name: 'Jan', value: 3000 }, { name: 'Feb', value: 3500 }, { name: 'Mar', value: 3200 },
+  { name: 'Apr', value: 4000 }, { name: 'May', value: 4200 }, { name: 'Jun', value: 4100 },
+  { name: 'Jul', value: 4500 }, { name: 'Aug', value: 4400 }, { name: 'Sep', value: 4800 },
+  { name: 'Oct', value: 5000 }, { name: 'Nov', value: 5200 }
+];
+
+export const WASTE_DISTRIBUTION = [
+  { name: 'Plastic', value: 35, fill: '#2D5A27' },
+  { name: 'Paper', value: 25, fill: '#5DAE54' },
+  { name: 'Metal', value: 15, fill: '#A3D99F' },
+  { name: 'E-waste', value: 15, fill: '#E9F2E8' },
+  { name: 'Others', value: 10, fill: '#CBD5E1' }
+];
+
+export const DRIVER_PERFORMANCE = [
+  { name: "Ben Tennyson", pickups: 158, rating: 4.8, efficiency: 92 },
+  { name: "Nafhath Mohamed", pickups: 203, rating: 4.9, efficiency: 96 },
+  { name: "Iman Fazney", pickups: 142, rating: 4.7, efficiency: 88 },
+  { name: "Aakif Saroos", pickups: 98, rating: 4.6, efficiency: 85 },
+  { name: "Harish Prasanna", pickups: 178, rating: 4.8, efficiency: 91 },
+];
+
+export const USER_GROWTH = [
+  { month: 'Jan', total: 800 }, { month: 'Mar', total: 950 }, 
+  { month: 'Jun', total: 1100 }, { month: 'Sep', total: 1200 }, { month: 'Nov', total: 1264 }
+];
