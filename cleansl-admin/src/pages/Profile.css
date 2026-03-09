@@ -9,6 +9,13 @@
   color: white;
 }
 
+/* Activity list styling */
+.cs-activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 /* Ensure consistent card spacing */
 .cs-wrapper {
   animation: fadeIn 0.3s ease-in-out;
