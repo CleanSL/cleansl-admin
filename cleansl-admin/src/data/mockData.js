@@ -162,3 +162,34 @@ export const COMPLAINTS_LIST = [
     assignedTo: "Nathath Team"
   }
 ];
+
+// --- Driver Logs / Fleet Tracking Mock Data ---
+
+export const DRIVER_LIST_DATA = [
+  { id: 1, name: 'Samantha Silva', username: '@Driver_01', hours: '5 Hours 13 Minutes', vehicle: 'Truck 001', route: 'Wellawatta', status: 'Offline' },
+  { id: 2, name: 'Kasun Rathnayake', username: '@Driver_02', hours: '8 Hours 38 Minutes', vehicle: 'Truck 002', route: 'Kollupitiya', status: 'Active' },
+  { id: 3, name: 'Mohammed Ali', username: '@Driver_03', hours: '8 Hours 07 Minutes', vehicle: 'Truck 003', route: 'Slave Island', status: 'Active' },
+  { id: 4, name: 'Kamal Perera', username: '@Driver_04', hours: '6 Hours 12 Minutes', vehicle: 'Truck 004', route: 'Bambalapitiya', status: 'Offline' },
+  { id: 5, name: 'Sanjaya Jayamaha', username: '@Driver_05', hours: '7 Hours 58 Minutes', vehicle: 'Truck 005', route: 'Maligawatta', status: 'Active' },
+  { id: 6, name: 'Sunil Weeraratne', username: '@Driver_06', hours: '5 Hours 33 Minutes', vehicle: 'Truck 006', route: 'Dehiwala', status: 'Offline' },
+];
+
+export const CITIES_PROGRESS_DATA = [
+  { name: 'Colombo 1 (Fort)', type: 'React Project', progress: 78, violations: 'None', color: 'bg-theme-accent' },
+  { name: 'Colombo 2 (Slave Island)', type: 'Figma Project', progress: 18, violations: 'None', color: 'bg-red-400' },
+  { name: 'Colombo 3 (Kollupitiya)', type: 'VueJs Project', progress: 62, violations: 'None', color: 'bg-purple-500' },
+  { name: 'Colombo 4 (Bambalapitiya)', type: 'Xamarin Project', progress: 8, violations: 'None', color: 'bg-orange-400' },
+  { name: 'Colombo 5 (Havelock Town)', type: 'Python Project', progress: 49, violations: 'None', color: 'bg-orange-400' },
+  { name: 'Colombo 6 (Wellawatta)', type: 'Sketch Project', progress: 92, violations: '01', color: 'bg-theme-accent' },
+  { name: 'Colombo 7 (Cinnamon Gardens)', type: 'HTML Project', progress: 88, violations: 'None', color: 'bg-theme-accent' },
+];
+
+export const SUCCESS_RATE_DATA = [
+  { name: 'Jan', rate: 10 },
+  { name: 'Feb', rate: 42 },
+  { name: 'Mar', rate: 23 },
+  { name: 'April', rate: 58 },
+  { name: 'May', rate: 39 },
+  { name: 'Jun', rate: 76 },
+  { name: 'Jul', rate: 89 },
+];
