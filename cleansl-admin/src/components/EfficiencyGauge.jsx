@@ -33,7 +33,7 @@ const EfficiencyGauge = () => {
           </PieChart>
         </ResponsiveContainer>
         <div className="absolute top-1/2 text-center">
-          <span className="text-3xl font-bold text-gray-800">72%</span>
+          <span className="text-3xl font-bold text-gray-800">73%</span>
         </div>
       </div>
     </div>
