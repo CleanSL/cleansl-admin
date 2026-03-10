@@ -1,5 +1,39 @@
 // mockData.js - centralized dummy data for the app
 
+export const ANALYTICS_TOTALS = {
+  waste: { value: "4.8 tons", trend: "+8.2%" },
+  pickups: { value: "234", trend: "+12.1%" },
+  users: { value: "1,264", trend: "+3.1%" }
+};
+
+export const MONTHLY_TRENDS = [
+  { name: 'Jan', value: 3000 }, { name: 'Feb', value: 3500 }, { name: 'Mar', value: 3200 },
+  { name: 'Apr', value: 4000 }, { name: 'May', value: 4200 }, { name: 'Jun', value: 4100 },
+  { name: 'Jul', value: 4500 }, { name: 'Aug', value: 4400 }, { name: 'Sep', value: 4800 },
+  { name: 'Oct', value: 5000 }, { name: 'Nov', value: 5200 }
+];
+
+export const WASTE_DISTRIBUTION = [
+  { name: 'Plastic', value: 35, fill: '#2D5A27' },
+  { name: 'Paper', value: 25, fill: '#5DAE54' },
+  { name: 'Metal', value: 15, fill: '#A3D99F' },
+  { name: 'E-waste', value: 15, fill: '#E9F2E8' },
+  { name: 'Others', value: 10, fill: '#CBD5E1' }
+];
+
+export const DRIVER_PERFORMANCE = [
+  { name: "Ben Tennyson", pickups: 158, rating: 4.8, efficiency: 92 },
+  { name: "Nafhath Mohamed", pickups: 203, rating: 4.9, efficiency: 96 },
+  { name: "Iman Fazney", pickups: 142, rating: 4.7, efficiency: 88 },
+  { name: "Aakif Saroos", pickups: 98, rating: 4.6, efficiency: 85 },
+  { name: "Harish Prasanna", pickups: 178, rating: 4.8, efficiency: 91 },
+];
+
+export const USER_GROWTH = [
+  { month: 'Jan', total: 800 }, { month: 'Mar', total: 950 }, 
+  { month: 'Jun', total: 1100 }, { month: 'Sep', total: 1200 }, { month: 'Nov', total: 1264 }
+];
+
 // statistics for overview cards
 export const MOCK_STATS = {
   totalPickups: 1240,

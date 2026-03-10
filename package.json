@@ -5,7 +5,6 @@
     "lucide-react": "^0.575.0",
     "mapbox-gl": "^3.18.1"
   },
-  "dependencies": {},
 
   "devDependencies": {
     "autoprefixer": "^10.4.24",
