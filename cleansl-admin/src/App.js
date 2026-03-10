@@ -19,7 +19,7 @@ function App() {
           <Route path="live-map" element={<LiveMap />} />
           <Route path="complaints" element={<Complaints />} />
           <Route path="violations" element={<Violations />} />
-          <Route path="Driver Log" element={<FleetStatus />} />
+          <Route path="driver-log" element={<FleetStatus />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="settings" element={<Settings />} />
           <Route path="profile" element={<Profile />} />

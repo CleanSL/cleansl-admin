@@ -51,7 +51,7 @@ const Dashboard = () => {
         <nav className="flex-1 space-y-1 overflow-y-auto custom-scrollbar">
           <NavItem icon={<LayoutGrid size={20} />} label="Overview" to="/" active={isOverview} />
           <NavItem icon={<Map size={20} />} label="Live Map" to="/live-map" active={location.pathname === '/live-map'} />
-          <NavItem icon={<Truck size={20} />} label="Driver Log" to="/Drive Log" active={location.pathname === '/fleet'} />
+          <NavItem icon={<Truck size={20} />} label="Driver Log" to="/driver-log" active={location.pathname === '/driver-log'} />
           <NavItem icon={<FileText size={20} />} label="Complaints" to="/complaints" active={location.pathname === '/complaints'} />
           <NavItem icon={<AlertTriangle size={20} />} label="Violations" to="/violations" active={location.pathname === '/violations'} />
           <NavItem icon={<PieChart size={20} />} label="Analytics" to="/analytics" active={location.pathname === '/analytics'} />
