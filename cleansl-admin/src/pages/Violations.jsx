@@ -2,14 +2,18 @@ import React, { useState, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import { 
+import {
   Search, 
   Calendar, 
   MapPin, 
   MoreHorizontal, 
   ShieldCheck,
   AlertTriangle,
-  X
+  X,
+  Clock,
+  CheckCircle2,
+  ArrowUpRight,
+  ArrowDownRight
 } from 'lucide-react';
 
 import { 
@@ -113,20 +117,33 @@ export default function Violations() {
         <div className="flex-[2] flex flex-col gap-8 min-w-0">
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {VIOLATION_STATS.map((stat, i) => (
-              <div key={i} className="bg-theme-card p-6 rounded-[30px] shadow-sm border border-white/40 group hover:border-theme-accent transition-all">
-                <div className="flex justify-between items-center mb-3">
-                   <p className="text-[10px] font-black text-theme-muted uppercase tracking-widest flex items-center gap-2">
-                     <div className="w-1.5 h-1.5 bg-theme-muted/40 group-hover:bg-theme-accent rounded-full transition-colors" /> {stat.label}
-                   </p>
-                   <MoreHorizontal size={16} className="text-theme-muted/30" />
+            {VIOLATION_STATS.map((stat, i) => {
+              const icons = [
+                <AlertTriangle size={16} className="text-theme-accent" />, 
+                <Clock size={16} className="text-theme-accent" />, 
+                <ShieldCheck size={16} className="text-theme-accent" />, 
+                <CheckCircle2 size={16} className="text-theme-accent" />
+              ];
+              const isNegative = stat.trend?.includes('-');
+              return (
+                <div key={i} className="bg-theme-card rounded-3xl p-6 shadow-sm flex flex-col justify-between border border-white/40 group hover:border-theme-accent transition-all cursor-pointer" onClick={() => alert("Loading violation category...")}>
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex items-center gap-2 text-theme-text font-bold text-sm">
+                      {icons[i]} <span>{stat.label}</span>
+                    </div>
+                    <div className="text-theme-muted font-bold tracking-widest leading-none opacity-50 group-hover:opacity-100 transition-opacity">...</div>
+                  </div>
+                  <div>
+                    <h3 className={`text-4xl font-bold mb-2 ${stat.color || 'text-theme-accent'}`}>{stat.value}</h3>
+                    <div className="flex items-center gap-1 text-xs font-semibold text-theme-text opacity-80">
+                      {isNegative ? <ArrowDownRight size={14} className="text-red-500" /> : <ArrowUpRight size={14} className="text-theme-accent" />}
+                      <span className={isNegative ? 'text-red-500' : 'text-theme-accent'}>{stat.trend}</span>
+                      <span className="text-theme-muted ml-1">vs last month</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-baseline gap-3">
-                  <span className={`text-4xl font-black ${stat.color || 'text-theme-text'}`}>{stat.value}</span>
-                  {stat.trend && <span className="text-[10px] font-bold text-theme-muted tracking-tighter">{stat.trend}</span>}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="bg-theme-card rounded-[40px] shadow-sm border border-white/40 overflow-hidden">

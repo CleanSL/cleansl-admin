@@ -15,6 +15,9 @@ import {
 // Local Assets
 import truckImg from '../images/truck.png';
 
+// Import from mockData
+import { WARDS_DATA, ACTIVE_TRUCK } from '../data/mockData';
+
 // Fix for Leaflet marker icons in React
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
@@ -27,20 +30,11 @@ let DefaultIcon = L.icon({
 });
 L.Marker.prototype.options.icon = DefaultIcon;
 
-// Mock Data
-const wards = [
-  { id: 1, name: "Ward 07: Cinnamon Gardens", progress: 65, trucks: ["T-01", "T-04"], status: "Progress" },
-  { id: 2, name: "Ward 04: Bambalapitiya", progress: 100, trucks: ["T-02", "T-05"], status: "Completed" },
-  { id: 3, name: "Ward 37: Kollupitiya", progress: 15, trucks: ["T-08", "T-09"], status: "Delayed" },
-];
-
+// Use the mock data
+const wards = WARDS_DATA;
+const routePath = ACTIVE_TRUCK.route;
 const trucksData = [
-  { id: 'T-01', lat: 6.9145, lng: 79.8650, location: 'No. 45, Rosmead Place' },
-  { id: 'T-04', lat: 6.9180, lng: 79.8700, location: 'No. 12, Horton Place' }
-];
-
-const routePath = [
-  [6.9145, 79.8650], [6.9160, 79.8680], [6.9120, 79.8750], [6.9080, 79.8700], [6.9145, 79.8650]
+  { id: ACTIVE_TRUCK.id, lat: ACTIVE_TRUCK.route[0][0], lng: ACTIVE_TRUCK.route[0][1], location: ACTIVE_TRUCK.location },
 ];
 
 // --- COMPONENTS ---
