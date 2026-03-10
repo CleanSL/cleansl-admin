@@ -1,6 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=Bree+Serif&family=Inter:wght@400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --bg-main: #F4F1E1; /* Light beige background */
+  --bg-sidebar: #E8F0DF; /* Pale sage green */
+  --bg-card: #DDE8CD; /* Light moss green */
+  --bg-card-dark: #C6D5B4; /* Darker sage green */
+  --text-dark: #1E3A2F; /* Deep forest green */
+  --text-muted: #557062; /* Muted text */
+  --accent: #3EC0A0; /* Bright mint accent */
+}
 
 /* Global resets and typography */
 * {
@@ -14,6 +26,7 @@ body,
 #root {
   height: 100%;
   width: 100%;
+  background-color: var(--bg-main);
 }
 
 body {
