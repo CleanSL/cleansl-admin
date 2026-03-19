@@ -1,266 +1,195 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { 
   User, Mail, Phone, MapPin, Building2, ShieldCheck, 
-  Globe, CheckCircle2, Edit3, Clock, Key, Smartphone, 
-  ShieldAlert, Upload, HardDrive, Save, X, Check
+  Globe, Smartphone, ShieldAlert, Save,
+  Activity, Calendar, BadgeCheck, Fingerprint
 } from 'lucide-react';
-import './Settings.css'; 
-import './Profile.css';  
+
+const FormField = ({ label, icon: Icon, value, onChange, type = "text", isEditing }) => (
+  <div className="flex flex-col gap-2 relative">
+    <label className="text-[10px] font-black uppercase text-theme-muted tracking-widest pl-1">{label}</label>
+    <div className="relative group">
+      <div className="absolute left-4 top-1/2 -translate-y-1/2 opacity-50 group-hover:opacity-100 transition-opacity">
+        <Icon size={16} className={isEditing ? 'text-theme-accent' : 'text-theme-text'} />
+      </div>
+      <input 
+        type={type}
+        value={value}
+        onChange={onChange}
+        disabled={!isEditing}
+        className={`w-full pl-12 pr-4 py-3.5 bg-theme-sidebar border rounded-2xl text-[13px] font-bold text-theme-text transition-all outline-none ${
+          isEditing 
+            ? 'border-white/60 focus:border-theme-accent shadow-inner focus:ring-4 focus:ring-theme-accent/10' 
+            : 'border-white/30 opacity-80 cursor-default'
+        }`}
+      />
+    </div>
+  </div>
+);
 
 export default function Profile() {
-  const [activeTab, setActiveTab] = useState('Overview');
-  const [isEditingOverview, setIsEditingOverview] = useState(false);
-  const navigate = useNavigate();
-
-  // --- State for Overview ---
+  const [isEditing, setIsEditing] = useState(false);
+  
   const [personalInfo, setPersonalInfo] = useState({
     fullName: 'Kasun Perera',
     email: 'kasun.p@cleansl.gov.lk',
     phone: '+94 11 268 1198',
-    location: 'Colombo Central',
+    location: 'Colombo Central Office',
     department: 'IT Operations',
-    role: 'System Admin',
+    role: 'System Administrator',
     language: 'English (UK)',
-    joinDate: '01/01/2024'
+    joinDate: 'Jan 01, 2024',
+    employeeId: 'EMP-4092',
+    emergencyContact: '+94 77 123 4567'
   });
 
-  // --- State for Security ---
   const [securityInfo, setSecurityInfo] = useState({
-    passwordStatus: 'Last changed 3 months ago',
+    passwordAge: '92 days',
     is2FAEnabled: false,
-    recoveryEmail: 'admin-recovery@cleansl.gov.lk'
+    recoveryEmail: 'admin-backup@cleansl.gov.lk'
   });
 
-  const [editStates, setEditStates] = useState({
-    email: false,
-    password: false
-  });
 
-  const [emailInput, setEmailInput] = useState(securityInfo.recoveryEmail);
-
-  // --- Logic Handlers ---
-  const handleEditProfileClick = () => {
-    setActiveTab('Overview');
-    setIsEditingOverview(true);
-  };
-
-  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  const validatePhone = (phone) => /^\+?[\d\s-]{7,15}$/.test(phone);
-
-  const saveOverview = () => {
-    if (!validateEmail(personalInfo.email)) return alert("Invalid email format");
-    if (!validatePhone(personalInfo.phone)) return alert("Invalid phone format");
-    setIsEditingOverview(false);
-  };
-
-  const updateRecoveryEmail = () => {
-    if (!validateEmail(emailInput)) return alert("Invalid recovery email format");
-    setSecurityInfo({ ...securityInfo, recoveryEmail: emailInput });
-    setEditStates({ ...editStates, email: false });
-  };
-
-  // --- Security Tab Renderer ---
-  const renderSecurity = () => (
-    <div className="cs-col">
-      <div className="cs-card">
-        <div className="cs-card-header" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '16px', marginBottom: '24px' }}>
-          <div>
-            <h2>Security & Authentication</h2>
-            <p style={{ margin: '4px 0 0 0', fontSize: '14px', color: '#64748b' }}>Manage your credentials and account protection.</p>
-          </div>
-        </div>
-
-        <div className="cs-info-grid" style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '24px' }}>
-          <div className="cs-info-item">
-            <label>Password Status</label>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-              <span><Key size={14} style={{ marginRight: '8px' }} /> {securityInfo.passwordStatus}</span>
-              <button 
-                className="cs-btn cs-btn-outline" 
-                onClick={() => setSecurityInfo({...securityInfo, passwordStatus: 'Changed just now'})}
-                style={{ padding: '4px 12px', fontSize: '12px', minWidth: '80px' }}
-              >
-                Change
-              </button>
-            </div>
-          </div>
-
-          <div className="cs-info-item">
-            <label>Two-Factor Auth</label>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-              <span style={{ color: securityInfo.is2FAEnabled ? '#10b981' : '#ef4444' }}>
-                {securityInfo.is2FAEnabled ? <Check size={14} style={{marginRight: '8px'}}/> : <ShieldAlert size={14} style={{ marginRight: '8px' }} />} 
-                {securityInfo.is2FAEnabled ? 'Enabled' : 'Currently Disabled'}
-              </span>
-              <button 
-                className="cs-btn cs-btn-outline" 
-                onClick={() => setSecurityInfo({...securityInfo, is2FAEnabled: !securityInfo.is2FAEnabled})}
-                style={{ padding: '4px 12px', fontSize: '12px', minWidth: '80px' }}
-              >
-                {securityInfo.is2FAEnabled ? 'Disable' : 'Setup'}
-              </button>
-            </div>
-          </div>
-
-          <div className="cs-info-item">
-            <label>Recovery Email</label>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-              {editStates.email ? (
-                <input 
-                  className="cs-edit-input" 
-                  value={emailInput} 
-                  onChange={(e) => setEmailInput(e.target.value)}
-                  style={{ flex: 1, marginRight: '10px' }}
-                />
-              ) : (
-                <span><Mail size={14} style={{ marginRight: '8px' }} /> {securityInfo.recoveryEmail}</span>
-              )}
-              
-              <div style={{ display: 'flex', gap: '5px' }}>
-                {editStates.email ? (
-                  <>
-                    <button className="cs-btn cs-btn-outline" onClick={updateRecoveryEmail} style={{ padding: '4px' }}><Check size={14}/></button>
-                    <button className="cs-btn cs-btn-outline" onClick={() => setEditStates({...editStates, email: false})} style={{ padding: '4px' }}><X size={14}/></button>
-                  </>
-                ) : (
-                  <button className="cs-btn cs-btn-outline" onClick={() => setEditStates({...editStates, email: true})} style={{ padding: '4px 12px', fontSize: '12px', minWidth: '80px' }}>Change</button>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div style={{ padding: '16px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-            <div style={{ color: '#64748b' }}><Smartphone size={18} /></div>
-            <div style={{ fontSize: '13px', color: '#475569', fontWeight: '500' }}>Active Sessions: <span style={{ color: '#0f172a' }}>2 Devices</span></div>
-          </div>
-          <button className="cs-btn-text" style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontWeight: '600', fontSize: '12px' }}>
-            Terminate All
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderActivity = () => (
-    <div className="cs-col">
-      <div className="cs-card">
-        <div className="cs-card-header" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '16px', marginBottom: '24px' }}>
-          <div>
-            <h2>System Activity Log</h2>
-            <p style={{ margin: '4px 0 0 0', fontSize: '14px', color: '#64748b' }}>A chronological record of your administrative actions.</p>
-          </div>
-        </div>
-        <div className="cs-activity-list" style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-          {[
-            { act: 'System Configuration Export', time: 'Today, 10:45 AM', icon: <Upload size={14} />, color: '#3b82f6' },
-            { act: 'Modified Fleet Schedule: Zone 04', time: 'Yesterday, 02:30 PM', icon: <HardDrive size={14} />, color: '#10b981' },
-            { act: 'New Admin Login Detected', time: 'Mar 02, 2026', icon: <ShieldCheck size={14} />, color: '#f59e0b' },
-            { act: 'Password Changed Successfully', time: 'Jan 22, 2026', icon: <Key size={14} />, color: '#64748b' }
-          ].map((item, i) => (
-            <div key={i} style={{ display: 'flex', gap: '16px', padding: '16px', borderBottom: '1px solid #f1f5f9' }}>
-              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', color: item.color, border: '1px solid #e2e8f0' }}>
-                {item.icon}
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b' }}>{item.act}</div>
-                <div style={{ fontSize: '12px', color: '#94a3b8' }}>{item.time}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
+  const handleSave = () => setIsEditing(false);
 
   return (
-    <div className="cs-wrapper">
-      {/* Updated Header Section */}
-      <div className="cs-header" style={{ alignItems: 'flex-start', marginBottom: '32px' }}>
+    <div className="flex flex-col gap-8 bg-theme-main font-sans selection:bg-theme-accent selection:text-white w-full pb-10">
+
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 style={{ margin: 0, fontSize: '1.60rem', fontWeight: '700', color: '#0f172a' }}>Profile</h1>
-          <div style={{ marginTop: '12px' }}>
-            <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: '600', color: '#1e293b' }}>Kasun Perera</h3>
-            <p style={{ margin: 0, color: '#64748b', fontSize: '14px' }}>System Administrator • IT Operations</p>
-          </div>
+          <h1 className="text-3xl font-serif font-black text-theme-text tracking-tight">Profile</h1>
+          <p className="text-sm text-theme-muted font-medium mt-1">Manage your personal information and security</p>
         </div>
-        <div className="cs-actions">
-            <button
-              className="cs-btn cs-btn-outline"
-              onClick={() => navigate('/settings')}
-              style={{ marginRight: '8px' }}
-            >
-              <ShieldCheck size={16} /> System Settings
-            </button>
-            {!isEditingOverview ? (
-              <button className="cs-btn cs-btn-outline" onClick={handleEditProfileClick}>
-                <Edit3 size={16} /> Edit Profile
-              </button>
-            ) : (
-              <div style={{display: 'flex', gap: '10px'}}>
-                <button className="cs-btn cs-btn-outline" onClick={() => setIsEditingOverview(false)}>Cancel</button>
-                <button className="cs-btn cs-btn-dark" onClick={saveOverview}><Save size={16} /> Save Changes</button>
+      </div>
+      
+      {/* Profile Hero Banner */}
+      <div className="bg-theme-card relative overflow-hidden rounded-[32px] border border-white/40 shadow-sm p-6 animate-in fade-in slide-in-from-top-4 duration-500 delay-100">
+        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-theme-accent/5 rounded-full blur-[60px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[200px] h-[200px] bg-emerald-500/5 rounded-full blur-[40px] translate-y-1/3 -translate-x-1/3 pointer-events-none" />
+        
+        <div className="relative z-10 flex flex-col md:flex-row justify-between items-center md:items-center gap-4">
+           <div className="flex flex-col md:flex-row items-center gap-5 text-center md:text-left">
+              <div className="relative group cursor-pointer">
+                 <div className="w-20 h-20 bg-white rounded-[20px] shadow-sm border-[3px] border-white flex items-center justify-center relative overflow-hidden group-hover:scale-105 transition-transform">
+                   <div className="absolute inset-0 bg-theme-sidebar/50" />
+                   <span className="font-serif text-3xl font-black text-theme-text/80 z-10">
+                     {personalInfo.fullName.charAt(0)}
+                   </span>
+                 </div>
+                 <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-emerald-500 rounded-full border-2 border-white flex items-center justify-center shadow-sm">
+                   <BadgeCheck size={12} className="text-white" />
+                 </div>
               </div>
-            )}
+              
+              <div>
+                <h1 className="font-serif text-2xl sm:text-3xl font-black text-theme-text tracking-tight mb-1">
+                  {personalInfo.fullName}
+                </h1>
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
+                   <span className="px-4 py-2 bg-theme-accent/10 text-theme-accent rounded-xl text-[11px] font-black uppercase tracking-widest border border-theme-accent/20">
+                     {personalInfo.role}
+                   </span>
+                   <span className="flex items-center gap-1.5 text-xs font-bold text-theme-muted">
+                     <Building2 size={14} /> {personalInfo.department}
+                   </span>
+                   <span className="flex items-center gap-1.5 text-xs font-bold text-theme-muted border-l border-theme-sidebar pl-3">
+                     <MapPin size={14} /> {personalInfo.location}
+                   </span>
+                </div>
+              </div>
+           </div>
+
+           <div className="flex items-center gap-3">
+               {isEditing ? (
+                 <>
+                   <button className="px-6 py-3 bg-white border border-white/50 text-theme-text rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-sm hover:bg-theme-sidebar transition-colors" onClick={() => setIsEditing(false)}>
+                     Discard
+                   </button>
+                   <button className="flex items-center gap-2 px-6 py-3 bg-theme-text text-white rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-theme-text/20 hover:opacity-90 hover:-translate-y-0.5 transition-all" onClick={handleSave}>
+                     <Save size={14} /> Confirm
+                   </button>
+                 </>
+               ) : (
+                 <button className="flex items-center gap-2 px-8 py-4 bg-white border border-white/50 text-theme-text rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-sm hover:border-theme-accent hover:shadow-md transition-all group" onClick={() => setIsEditing(true)}>
+                   <User size={14} className="text-theme-accent group-hover:scale-110 transition-transform" /> Modify Details
+                 </button>
+               )}
+           </div>
         </div>
       </div>
 
-      <div className="cs-tabs-container" style={{ marginBottom: '24px' }}>
-        {['Overview', 'Security', 'Activity'].map((tab) => (
-          <button 
-            key={tab} 
-            disabled={isEditingOverview}
-            onClick={() => setActiveTab(tab)} 
-            className={`cs-tab ${activeTab === tab ? 'active' : ''}`}
-            style={{opacity: isEditingOverview ? 0.5 : 1}}
-          >
-            {tab === 'Overview' && <User size={16} />}
-            {tab === 'Security' && <ShieldCheck size={16} />}
-            {tab === 'Activity' && <Clock size={16} />}
-            <span style={{ marginLeft: '8px' }}>{tab}</span>
-          </button>
-        ))}
-      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
+        
+        {/* Left Column: Personal Information & Settings */}
+        <div className="flex flex-col gap-8 h-full">
+           
+           <div className="bg-theme-card rounded-[40px] border border-white/40 shadow-sm p-8 hover:border-theme-accent/30 transition-colors h-full flex flex-col">
+              <h3 className="font-serif text-2xl font-black text-theme-text mb-8 border-b border-theme-sidebar pb-4">Identifier Registry</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
+                 <FormField label="Full Name" icon={User} isEditing={isEditing} value={personalInfo.fullName} onChange={e => setPersonalInfo({...personalInfo, fullName: e.target.value})} />
+                 <FormField label="Employee ID" icon={BadgeCheck} isEditing={isEditing} value={personalInfo.employeeId} onChange={e => setPersonalInfo({...personalInfo, employeeId: e.target.value})} />
+                 <FormField label="Email Contact" icon={Mail} isEditing={isEditing} value={personalInfo.email} onChange={e => setPersonalInfo({...personalInfo, email: e.target.value})} />
+                 <FormField label="Phone Number" icon={Phone} isEditing={isEditing} value={personalInfo.phone} onChange={e => setPersonalInfo({...personalInfo, phone: e.target.value})} />
+                 <FormField label="Department" icon={Building2} isEditing={isEditing} value={personalInfo.department} onChange={e => setPersonalInfo({...personalInfo, department: e.target.value})} />
+                 <FormField label="Office Location" icon={MapPin} isEditing={isEditing} value={personalInfo.location} onChange={e => setPersonalInfo({...personalInfo, location: e.target.value})} />
+                 <FormField label="Emergency Contact" icon={Smartphone} isEditing={isEditing} value={personalInfo.emergencyContact} onChange={e => setPersonalInfo({...personalInfo, emergencyContact: e.target.value})} />
+                 <FormField label="Language Pref" icon={Globe} isEditing={isEditing} value={personalInfo.language} onChange={e => setPersonalInfo({...personalInfo, language: e.target.value})} />
+              </div>
+           </div>
+        </div>
 
-      {activeTab === 'Overview' && (
-        <div className="cs-col">
-          <div className="cs-card">
-            <div className="cs-card-header" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '16px', marginBottom: '24px' }}>
-              <div><h2>Personal Information</h2><p style={{ margin: '4px 0 0 0', fontSize: '14px', color: '#64748b' }}>Your account details and contact information.</p></div>
+        {/* Right Column: Security & Activity */}
+        <div className="flex flex-col gap-8 h-full">
+          
+          <div className="bg-theme-card rounded-[40px] border border-white/40 shadow-sm p-8 flex flex-col gap-6 hover:border-theme-accent/30 transition-colors h-full">
+            <h3 className="font-serif text-xl font-black text-theme-text flex items-center gap-3">
+              <Fingerprint size={24} className="text-theme-accent" /> Security Hub
+            </h3>
+            
+            <div className="p-5 bg-white rounded-[24px] border border-white/50 shadow-sm">
+               <div className="flex justify-between items-center mb-1">
+                 <span className="text-[11px] font-extrabold text-theme-text">Master Password</span>
+                 <span className="text-[10px] font-black text-theme-muted uppercase tracking-wider">{securityInfo.passwordAge}</span>
+               </div>
+               <p className="text-[10px] font-bold text-theme-muted/80 mb-4">You should rotate your credentials periodically.</p>
+               <button className="w-full py-2.5 bg-theme-sidebar rounded-xl text-[10px] font-black uppercase tracking-widest text-theme-text hover:bg-theme-accent hover:text-white transition-colors border border-white/50">
+                 Rotate Keys
+               </button>
             </div>
-            <div className="cs-info-grid">
-              <div className="cs-info-item">
-                <label>Full Name</label>
-                {isEditingOverview ? <input className="cs-edit-input" value={personalInfo.fullName} onChange={e => setPersonalInfo({...personalInfo, fullName: e.target.value})}/> : <span><User size={14} /> {personalInfo.fullName}</span>}
+
+            <div className="p-5 bg-white rounded-[24px] border border-white/50 shadow-sm flex flex-col gap-4">
+               <div className="flex justify-between items-center">
+                 <div>
+                   <span className="text-[11px] font-extrabold text-theme-text mb-0.5 block">2-Factor Auth</span>
+                   <span className={`text-[10px] font-black uppercase tracking-widest ${securityInfo.is2FAEnabled ? 'text-emerald-500' : 'text-red-400'}`}>
+                     {securityInfo.is2FAEnabled ? 'Secured' : 'Vulnerable'}
+                   </span>
+                 </div>
+                 <button onClick={() => setSecurityInfo(p => ({...p, is2FAEnabled: !p.is2FAEnabled}))} className="w-12 h-12 bg-theme-sidebar rounded-2xl flex items-center justify-center hover:scale-105 transition-transform border border-white/50">
+                   {securityInfo.is2FAEnabled ? <ShieldCheck size={20} className="text-emerald-500" /> : <ShieldAlert size={20} className="text-red-400" />}
+                 </button>
+               </div>
+            </div>
+
+            <div className="p-5 bg-white rounded-[24px] border border-white/50 shadow-sm flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-theme-sidebar flex items-center justify-center rounded-[14px]">
+                  <Smartphone size={16} className="text-indigo-500" />
+                </div>
+                <div>
+                  <span className="text-[11px] font-extrabold text-theme-text block">Active Nodes</span>
+                  <span className="text-[10px] font-bold text-theme-muted">2 Authorized</span>
+                </div>
               </div>
-              <div className="cs-info-item">
-                <label>Email Address</label>
-                {isEditingOverview ? <input className="cs-edit-input" type="email" value={personalInfo.email} onChange={e => setPersonalInfo({...personalInfo, email: e.target.value})}/> : <span><Mail size={14} /> {personalInfo.email}</span>}
-              </div>
-              <div className="cs-info-item">
-                <label>Phone Number</label>
-                {isEditingOverview ? <input className="cs-edit-input" value={personalInfo.phone} onChange={e => setPersonalInfo({...personalInfo, phone: e.target.value})}/> : <span><Phone size={14} /> {personalInfo.phone}</span>}
-              </div>
-              <div className="cs-info-item">
-                <label>Work Location</label>
-                {isEditingOverview ? <input className="cs-edit-input" value={personalInfo.location} onChange={e => setPersonalInfo({...personalInfo, location: e.target.value})}/> : <span><MapPin size={14} /> {personalInfo.location}</span>}
-              </div>
-              <div className="cs-info-item"><label>Department</label><span><Building2 size={14} /> {personalInfo.department}</span></div>
-              <div className="cs-info-item"><label>Role</label><span><ShieldCheck size={14} /> {personalInfo.role}</span></div>
-              <div className="cs-info-item">
-                <label>Language</label>
-                {isEditingOverview ? <input className="cs-edit-input" value={personalInfo.language} onChange={e => setPersonalInfo({...personalInfo, language: e.target.value})}/> : <span><Globe size={14} /> {personalInfo.language}</span>}
-              </div>
-              <div className="cs-info-item"><label>Join Date</label><span><CheckCircle2 size={14} /> {personalInfo.joinDate}</span></div>
+              <button className="text-[10px] font-black uppercase tracking-widest text-red-500 hover:text-red-700 transition-colors">Wipe All</button>
             </div>
           </div>
-        </div>
-      )}
 
-      {activeTab === 'Security' && renderSecurity()}
-      {activeTab === 'Activity' && renderActivity()}
+
+        </div>
+      </div>
+
     </div>
   );
 }
