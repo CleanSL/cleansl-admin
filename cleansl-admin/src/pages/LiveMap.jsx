@@ -1,7 +1,5 @@
-import React from 'react';
-import { MapContainer, TileLayer, Polyline, Marker, Popup } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
+import React, { useEffect, useState } from 'react';
+import { GoogleMap, LoadScript, Marker, Polyline } from '@react-google-maps/api';
 import { 
   Search, 
   Truck, 
@@ -18,17 +16,8 @@ import truckImg from '../images/truck.png';
 // Import from mockData
 import { WARDS_DATA, ACTIVE_TRUCK } from '../data/mockData';
 
-// Fix for Leaflet marker icons in React
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-
-let DefaultIcon = L.icon({
-  iconUrl: markerIcon,
-  shadowUrl: markerShadow,
-  iconSize: [25, 41],
-  iconAnchor: [12, 41]
-});
-L.Marker.prototype.options.icon = DefaultIcon;
+// Get API Key from environment variables
+const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
 
 // Use the mock data
 const wards = WARDS_DATA;
@@ -109,6 +98,22 @@ const VehicleDetails = () => (
 // --- MAIN PAGE ---
 
 export default function LiveMap() {
+  const [mapCenter, setMapCenter] = useState({ lat: 6.9145, lng: 79.8650 });
+  const [trucks, setTrucks] = useState(trucksData);
+  const [routeCoords, setRouteCoords] = useState(
+    routePath.map(([lat, lng]) => ({ lat, lng }))
+  );
+
+  const mapOptions = {
+    disableDefaultUI: false,
+    zoomControl: true,
+    mapTypeControl: true,
+    scaleControl: true,
+    streetViewControl: false,
+    rotateControl: false,
+    fullscreenControl: true,
+  };
+
   return (
     <div className="flex flex-col h-full gap-6 bg-theme-main p-4 md:p-8 overflow-y-auto selection:bg-theme-accent selection:text-white font-sans">
       
@@ -168,15 +173,48 @@ export default function LiveMap() {
           
           {/* Main Map */}
           <div className="h-[350px] lg:h-[400px] bg-theme-sidebar rounded-[40px] overflow-hidden border border-white/50 relative shadow-sm">
-            <MapContainer center={[6.9145, 79.8650]} zoom={15} className="h-full w-full z-0">
-              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-              <Polyline positions={routePath} color="var(--accent)" weight={6} opacity={0.8} lineCap="round" />
-              {trucksData.map(truck => (
-                <Marker key={truck.id} position={[truck.lat, truck.lng]}>
-                  <Popup><span className="font-bold">Truck {truck.id}</span><br/>{truck.location}</Popup>
-                </Marker>
-              ))}
-            </MapContainer>
+            {GOOGLE_MAPS_API_KEY ? (
+              <LoadScript googleMapsApiKey={GOOGLE_MAPS_API_KEY}>
+                <GoogleMap
+                  mapContainerStyle={{
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: '40px',
+                  }}
+                  center={mapCenter}
+                  zoom={15}
+                  options={mapOptions}
+                >
+                  {/* Route Polyline */}
+                  {routeCoords.length > 1 && (
+                    <Polyline
+                      path={routeCoords}
+                      options={{
+                        strokeColor: '#FF6B35',
+                        strokeOpacity: 0.8,
+                        strokeWeight: 6,
+                      }}
+                    />
+                  )}
+                  
+                  {/* Truck Markers */}
+                  {trucks.map(truck => (
+                    <Marker
+                      key={truck.id}
+                      position={{ lat: truck.lat, lng: truck.lng }}
+                      title={`Truck ${truck.id}`}
+                      options={{
+                        icon: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png'
+                      }}
+                    />
+                  ))}
+                </GoogleMap>
+              </LoadScript>
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-theme-sidebar">
+                <p className="text-theme-muted font-bold">Google Maps API Key not configured</p>
+              </div>
+            )}
             
             {/* Overlay Label Top Right */}
             <div className="absolute top-6 right-6 z-[1000] bg-white/90 text-theme-text p-4 rounded-3xl shadow-xl flex items-center gap-3 backdrop-blur-md border border-white">

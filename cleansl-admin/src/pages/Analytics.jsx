@@ -1,13 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, LineChart, Line
 } from 'recharts';
 import { Search, Calendar, Download, Users, Truck, Recycle, Star } from 'lucide-react';
-import { 
-  ANALYTICS_TOTALS, MONTHLY_TRENDS, WASTE_DISTRIBUTION, 
-  DRIVER_PERFORMANCE, USER_GROWTH 
-} from '../data/mockData';
+import { analyticsAPI } from '../services/api';
 
 const AnalyticsCard = ({ title, value, trend, icon, color }) => (
   <div className="bg-theme-card p-6 rounded-[32px] shadow-sm border border-white/40 flex-1 flex justify-between items-center group hover:border-theme-accent transition-all min-w-[250px]">
@@ -24,6 +21,42 @@ const AnalyticsCard = ({ title, value, trend, icon, color }) => (
 
 export default function ReportsAnalytics() {
   const [activeTab, setActiveTab] = useState('collection'); // 'collection', 'driver', 'user'
+  const [analyticsData, setAnalyticsData] = useState({
+    totals: {
+      waste: { value: "0 tons", trend: "+0%" },
+      pickups: { value: "0", trend: "+0%" },
+      users: { value: "0", trend: "+0%" }
+    },
+    monthlyTrends: [],
+    wasteDistribution: [],
+    driverPerformance: [],
+    userGrowth: []
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAnalyticsData = async () => {
+      try {
+        setLoading(true);
+        const [trends, waste] = await Promise.all([
+          analyticsAPI.getMonthlyTrends(),
+          analyticsAPI.getWasteDistribution()
+        ]);
+
+        setAnalyticsData(prev => ({
+          ...prev,
+          monthlyTrends: trends,
+          wasteDistribution: waste
+        }));
+      } catch (error) {
+        console.error('Error fetching analytics:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAnalyticsData();
+  }, []);
 
   return (
     <div className="flex flex-col gap-6 bg-theme-main p-8 h-full overflow-y-auto font-sans selection:bg-theme-accent selection:text-white">
@@ -59,8 +92,8 @@ export default function ReportsAnalytics() {
 
       {/* Dynamic Content Area */}
       <div className="flex-1 min-h-0">
-        {activeTab === 'collection' && <CollectionAnalyticsView />}
-        {activeTab === 'driver' && <DriverPerformanceView />}
+        {activeTab === 'collection' && <CollectionAnalyticsView trends={analyticsData.monthlyTrends} waste={analyticsData.wasteDistribution} />}
+        {activeTab === 'driver' && <DriverPerformanceView drivers={analyticsData.driverPerformance} />}
         {activeTab === 'user' && <UserGrowthView />}
       </div>
     </div>
@@ -69,83 +102,88 @@ export default function ReportsAnalytics() {
 
 // --- SUB-VIEWS ---
 
-const CollectionAnalyticsView = () => (
-  <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 h-full pb-8">
-    <div className="xl:col-span-2 bg-theme-card p-8 rounded-[40px] shadow-sm border border-white/40">
-      <h4 className="font-black text-theme-muted mb-8 uppercase text-xs tracking-widest flex items-center gap-2"><div className="w-2 h-2 bg-theme-accent rounded-full"/> Monthly Collection Trends</h4>
-      <div className="h-[300px] w-full">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={MONTHLY_TRENDS}>
-            <defs>
-              <linearGradient id="colorValAna" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="var(--accent)" stopOpacity={0.3}/><stop offset="95%" stopColor="var(--accent)" stopOpacity={0}/></linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#ffffff" strokeOpacity={0.4} />
-            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 700, fill: 'var(--text-muted)'}} dy={10} />
-            <YAxis axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 700, fill: 'var(--text-muted)'}} />
-            <Tooltip contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-            <Area type="monotone" dataKey="value" stroke="var(--accent)" strokeWidth={3} fillOpacity={1} fill="url(#colorValAna)" />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
-    <div className="bg-theme-card p-8 rounded-[40px] shadow-sm border border-white/40 flex flex-col min-h-[400px]">
-      <h4 className="font-black text-theme-muted mb-4 uppercase text-xs tracking-widest">Waste Category Distribution</h4>
-      <div className="flex-1 min-h-[300px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie data={WASTE_DISTRIBUTION} innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value" stroke="none">
-              {WASTE_DISTRIBUTION.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.fill} />)}
-            </Pie>
-            <Tooltip contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-          </PieChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
-  </div>
-);
+const CollectionAnalyticsView = ({ trends = [], waste = [] }) => {
+  const defaultTrends = trends.length > 0 ? trends.map((t, i) => ({name: `Month ${i+1}`, value: t.value || 3000})) : [
+    { name: 'Jan', value: 3000 }, { name: 'Feb', value: 3500 },
+    { name: 'Mar', value: 3200 }, { name: 'Apr', value: 4000 },
+    { name: 'May', value: 4200 }, { name: 'Jun', value: 4100 }
+  ];
 
-const DriverPerformanceView = () => (
-  <div className="bg-theme-card p-8 rounded-[40px] shadow-sm border border-white/40">
-    <h4 className="font-black text-theme-muted mb-8 uppercase text-xs tracking-widest flex items-center gap-2"><div className="w-2 h-2 bg-theme-accent rounded-full"/> Driver Performance Metrics</h4>
-    <div className="space-y-6">
-      {DRIVER_PERFORMANCE.map((driver, i) => (
-        <div key={i} className="flex flex-col gap-2">
-          <div className="flex flex-col sm:flex-row justify-between sm:items-center text-sm font-bold text-theme-text gap-2">
-            <span>{driver.name} <span className="text-theme-muted font-medium sm:ml-2 block sm:inline">{driver.pickups} pickups • Rating: {driver.rating}/5</span></span>
-            <span className="bg-theme-sidebar border border-white/50 px-3 py-1 rounded-full text-theme-accent text-xs w-fit shadow-inner">{driver.efficiency}% Efficiency</span>
-          </div>
-          <div className="w-full bg-theme-sidebar border border-white/30 h-2 rounded-full overflow-hidden shadow-inner">
-            <div className="bg-theme-accent h-full rounded-full transition-all duration-1000 shadow-sm" style={{ width: `${driver.efficiency}%` }} />
-          </div>
+  const defaultWaste = waste.length > 0 ? waste : [
+    { name: 'Plastic', value: 35, fill: '#2D5A27' },
+    { name: 'Paper', value: 25, fill: '#5DAE54' },
+    { name: 'Metal', value: 15, fill: '#A3D99F' },
+    { name: 'E-waste', value: 15, fill: '#E9F2E8' },
+    { name: 'Others', value: 10, fill: '#CBD5E1' }
+  ];
+
+  return (
+    <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 h-full pb-8">
+      <div className="xl:col-span-2 bg-theme-card p-8 rounded-[40px] shadow-sm border border-white/40">
+        <h4 className="font-black text-theme-muted mb-8 uppercase text-xs tracking-widest flex items-center gap-2"><div className="w-2 h-2 bg-theme-accent rounded-full"/> Monthly Collection Trends</h4>
+        <div className="h-[300px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={defaultTrends}>
+              <defs>
+                <linearGradient id="colorValAna" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="var(--accent)" stopOpacity={0.3}/><stop offset="95%" stopColor="var(--accent)" stopOpacity={0}/></linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#ffffff" strokeOpacity={0.4} />
+              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 700, fill: 'var(--text-muted)'}} dy={10} />
+              <YAxis axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 700, fill: 'var(--text-muted)'}} />
+              <Tooltip contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+              <Area type="monotone" dataKey="value" stroke="var(--accent)" strokeWidth={3} fillOpacity={1} fill="url(#colorValAna)" />
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
-      ))}
-    </div>
-  </div>
-);
-
-const UserGrowthView = () => (
-  <div className="flex flex-col gap-6">
-    <div className="bg-theme-card p-8 rounded-[40px] shadow-sm border border-white/40">
-      <h4 className="font-black text-theme-muted mb-8 uppercase text-xs tracking-widest flex items-center gap-2"><Users size={16} className="text-theme-accent"/> User Growth Over Time</h4>
-      <div className="h-[300px] w-full">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={USER_GROWTH}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#ffffff" strokeOpacity={0.4} />
-            <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 700, fill: 'var(--text-muted)'}} dy={10} />
-            <YAxis axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 700, fill: 'var(--text-muted)'}} />
-            <Tooltip contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-            <Line type="monotone" dataKey="total" stroke="var(--accent)" strokeWidth={4} dot={{ r: 6, fill: 'var(--accent)', strokeWidth: 0 }} activeDot={{ r: 8, strokeWidth: 0 }} />
-          </LineChart>
-        </ResponsiveContainer>
+      </div>
+      <div className="bg-theme-card p-8 rounded-[40px] shadow-sm border border-white/40 flex flex-col min-h-[400px]">
+        <h4 className="font-black text-theme-muted mb-4 uppercase text-xs tracking-widest">Waste Category Distribution</h4>
+        <div className="flex-1 min-h-[300px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie data={defaultWaste} innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value" stroke="none">
+                {defaultWaste.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.fill} />)}
+              </Pie>
+              <Tooltip contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
       </div>
     </div>
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pb-8">
-      <StatBox label="Total Users" value="1,264" sub="+419 new this year" />
-      <StatBox label="Avg. Monthly Growth" value="+38" sub="3.1% growth rate" />
-      <StatBox label="Retention Rate" value="89%" sub="+2.3% vs last quarter" />
+  );
+};
+
+const DriverPerformanceView = ({ drivers = [] }) => {
+  const defaultDrivers = drivers.length > 0 ? drivers : [];
+  const USER_GROWTH = [
+    { month: 'Jan', total: 800 }, { month: 'Mar', total: 950 }, 
+    { month: 'Jun', total: 1100 }, { month: 'Sep', total: 1200 }, { month: 'Nov', total: 1264 }
+  ];
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="bg-theme-card p-8 rounded-[40px] shadow-sm border border-white/40">
+        <h4 className="font-black text-theme-muted mb-8 uppercase text-xs tracking-widest flex items-center gap-2"><Users size={16} className="text-theme-accent"/> User Growth Over Time</h4>
+        <div className="h-[300px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={USER_GROWTH}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#ffffff" strokeOpacity={0.4} />
+              <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 700, fill: 'var(--text-muted)'}} dy={10} />
+              <YAxis axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 700, fill: 'var(--text-muted)'}} />
+              <Tooltip contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+              <Line type="monotone" dataKey="total" stroke="var(--accent)" strokeWidth={4} dot={{ r: 6, fill: 'var(--accent)', strokeWidth: 0 }} activeDot={{ r: 8, strokeWidth: 0 }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pb-8">
+        <StatBox label="Total Users" value="1,264" sub="+419 new this year" />
+        <StatBox label="Avg. Monthly Growth" value="+38" sub="3.1% growth rate" />
+        <StatBox label="Retention Rate" value="89%" sub="+2.3% vs last quarter" />
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 // --- HELPERS ---
 

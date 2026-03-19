@@ -1,7 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart as RechartsPie, Pie, Cell } from 'recharts';
 import { Truck, AlertTriangle, Map, FileText, ArrowUpRight, ArrowDownRight, CheckCircle2, Search } from 'lucide-react';
-import { MOCK_STATS, MOCK_OPERATIONS } from '../data/mockData';
+import { analyticsAPI, violationAPI, truckAPI } from '../services/api';
 
 // --- Reusable Stat Card ---
 const StatCard = ({ title, value, trend, isNegative, icon, subtitle }) => (
@@ -54,37 +54,82 @@ const FeedRow = ({ num, event, detail, time, status, color }) => {
 export default function Overview() {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('all');
+  const [stats, setStats] = useState(null);
+  const [operations, setOperations] = useState([]);
+  const [chartData, setChartData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock Data for Area Chart
-  const chartData = [
-    { name: 'Dec 01', tons: 8 }, { name: 'Dec 05', tons: 16 },
-    { name: 'Dec 10', tons: 13 }, { name: 'Dec 15', tons: 5 },
-    { name: 'Dec 20', tons: 20 }, { name: 'Dec 25', tons: 10 },
-    { name: 'Dec 30', tons: 18 }
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        // Fetch stats
+        const statsResponse = await analyticsAPI.getDashboardStats();
+        setStats(statsResponse);
 
-  const gaugeData = [{ name: 'Efficiency', value: parseInt(MOCK_STATS.efficiency) }, { name: 'Remainder', value: 100 - parseInt(MOCK_STATS.efficiency) }];
+        // Fetch analytics for chart
+        const analyticsData = await analyticsAPI.getMonthlyTrends();
+        const formattedChartData = analyticsData.map(item => ({
+          name: item._id,
+          tons: (item.value / 1000).toFixed(1)
+        }));
+        setChartData(formattedChartData);
+
+        // Fetch violations for operations feed
+        const violations = await violationAPI.getAll();
+        const trucks = await truckAPI.getAll();
+        
+        // Create mock operations feed
+        const mockOps = violations.slice(0, 5).map((v, idx) => ({
+          id: v._id || idx,
+          event: "Violation Reported",
+          detail: v.description || "Traffic violation",
+          time: new Date(v.date).toLocaleTimeString(),
+          status: v.status,
+          color: 'red'
+        }));
+        
+        setOperations(mockOps);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const displayStats = stats || {
+    totalPickups: 1240,
+    missedPickups: 14,
+    activeTrucks: 8,
+    newComplaints: 5,
+    efficiency: 72
+  };
+
+  const gaugeData = [{ name: 'Efficiency', value: displayStats.efficiency || 72 }, { name: 'Remainder', value: 100 - (displayStats.efficiency || 72) }];
   const COLORS = ['var(--accent)', '#DDE8CD'];
 
   const filteredOperations = useMemo(() => {
     const q = (query || '').trim().toLowerCase();
-    return MOCK_OPERATIONS.filter(op => {
+    return operations.filter(op => {
       const matchSearch = op.event.toLowerCase().includes(q) || op.detail.toLowerCase().includes(q);
       const matchFilter = filter === 'all' || 
           (filter === 'pickups' && op.event.toLowerCase().includes('collection')) || 
           (filter === 'violations' && op.event.toLowerCase().includes('violation'));
       return matchSearch && matchFilter;
     });
-  }, [query, filter]);
+  }, [query, filter, operations]);
 
   return (
     <div className="max-w-[1400px] mx-auto">
       {/* TOP 4 STAT CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
-        <StatCard title="Total Pickups" value={MOCK_STATS.totalPickups.toString()} trend="+12%" subtitle="this week" icon={<Truck size={16} />} />
-        <StatCard title="Missed Pickups" value={MOCK_STATS.missedPickups.toString()} trend="-2%" subtitle="this week" isNegative={true} icon={<AlertTriangle size={16} />} />
-        <StatCard title="Active Trucks" value={MOCK_STATS.activeTrucks.toString().padStart(2, '0')} trend={`+${MOCK_STATS.activeTrucks} active`} subtitle="" icon={<Map size={16} />} />
-        <StatCard title="New Complaints" value={MOCK_STATS.newComplaints.toString().padStart(2, '0')} trend="Pending" subtitle="queue" icon={<FileText size={16} />} />
+        <StatCard title="Total Pickups" value={displayStats.totalPickups.toString()} trend="+12%" subtitle="this week" icon={<Truck size={16} />} />
+        <StatCard title="Missed Pickups" value={displayStats.missedPickups.toString()} trend="-2%" subtitle="this week" isNegative={true} icon={<AlertTriangle size={16} />} />
+        <StatCard title="Active Trucks" value={displayStats.activeTrucks.toString().padStart(2, '0')} trend={`+${displayStats.activeTrucks} active`} subtitle="" icon={<Map size={16} />} />
+        <StatCard title="New Complaints" value={displayStats.newComplaints.toString().padStart(2, '0')} trend="Pending" subtitle="queue" icon={<FileText size={16} />} />
       </div>
 
       {/* MIDDLE CHARTS ROW */}
@@ -154,7 +199,7 @@ export default function Overview() {
               </RechartsPie>
             </ResponsiveContainer>
             <div className="absolute bottom-4 text-5xl font-bold font-serif text-theme-text">
-              {MOCK_STATS.efficiency}
+              {displayStats.efficiency}%
             </div>
           </div>
 

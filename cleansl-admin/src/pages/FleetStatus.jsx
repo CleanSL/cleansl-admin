@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Search, 
   Calendar, 
@@ -14,7 +14,7 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { DRIVER_LIST_DATA, CITIES_PROGRESS_DATA, SUCCESS_RATE_DATA } from '../data/mockData';
+import { truckAPI } from '../services/api';
 
 // Fix for Leaflet marker icons in React
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
@@ -56,6 +56,65 @@ const DriverSummaryCard = ({ title, extraLabel, extraColor, avatars }) => (
 
 export default function FleetStatus() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [wardProgress, setWardProgress] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const truckData = await truckAPI.getAll();
+        
+        // Trucks data is used for ward progress, not stored in state
+        
+        // Create ward progress from truck data
+        const wardsData = truckData.reduce((acc, truck) => {
+          const existing = acc.find(w => w.name === truck.ward);
+          if (existing) {
+            existing.progress = Math.min(100, existing.progress + truck.loadPercentage / truckData.length);
+          } else {
+            acc.push({
+              name: truck.ward,
+              type: truck.model,
+              progress: truck.loadPercentage,
+              violations: 'None'
+            });
+          }
+          return acc;
+        }, []);
+        setWardProgress(wardsData);
+      } catch (error) {
+        console.error('Error fetching fleet data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Fallback data
+  const DRIVER_LIST_DATA = drivers.length > 0 ? drivers.map((d, i) => ({
+    id: i,
+    name: d.name,
+    username: `@driver_${i}`,
+    hours: `${Math.floor(Math.random() * 8)} Hours ${Math.floor(Math.random() * 60)} Minutes`,
+    vehicle: `Truck ${i+1}`,
+    route: 'Ward Route',
+    status: d.status === 'Active' ? 'Active' : 'Offline'
+  })) : [];
+
+  const CITIES_PROGRESS_DATA = wardProgress.length > 0 ? wardProgress : [
+    { name: 'Ward 1', type: 'Collection Zone', progress: 78, violations: 'None' },
+    { name: 'Ward 2', type: 'Collection Zone', progress: 45, violations: 'None' },
+    { name: 'Ward 3', type: 'Collection Zone', progress: 62, violations: 'None' }
+  ];
+
+  const SUCCESS_RATE_DATA = [
+    { name: 'Jan', rate: 10 }, { name: 'Feb', rate: 42 },
+    { name: 'Mar', rate: 23 }, { name: 'Apr', rate: 58 },
+    { name: 'May', rate: 39 }, { name: 'Jun', rate: 76 },
+    { name: 'Jul', rate: 89 }
+  ];
 
   return (
     <div className="flex flex-col gap-6 bg-theme-main p-8 h-full overflow-y-auto font-sans selection:bg-theme-accent selection:text-white">
