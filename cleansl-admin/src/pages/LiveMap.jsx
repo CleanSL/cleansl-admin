@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { GoogleMap, LoadScript, Marker, Polyline } from '@react-google-maps/api';
+import React from 'react';
+import { MapContainer, TileLayer, Polyline, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
 import { 
   Search, 
   Truck, 
@@ -16,8 +18,17 @@ import truckImg from '../images/truck.png';
 // Import from mockData
 import { WARDS_DATA, ACTIVE_TRUCK } from '../data/mockData';
 
-// Get API Key from environment variables
-const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
+// Fix for Leaflet marker icons in React
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+let DefaultIcon = L.icon({
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41]
+});
+L.Marker.prototype.options.icon = DefaultIcon;
 
 // Use the mock data
 const wards = WARDS_DATA;
@@ -98,30 +109,14 @@ const VehicleDetails = () => (
 // --- MAIN PAGE ---
 
 export default function LiveMap() {
-  const [mapCenter, setMapCenter] = useState({ lat: 6.9145, lng: 79.8650 });
-  const [trucks, setTrucks] = useState(trucksData);
-  const [routeCoords, setRouteCoords] = useState(
-    routePath.map(([lat, lng]) => ({ lat, lng }))
-  );
-
-  const mapOptions = {
-    disableDefaultUI: false,
-    zoomControl: true,
-    mapTypeControl: true,
-    scaleControl: true,
-    streetViewControl: false,
-    rotateControl: false,
-    fullscreenControl: true,
-  };
-
   return (
-    <div className="flex flex-col h-full gap-6 bg-theme-main p-4 md:p-8 overflow-y-auto selection:bg-theme-accent selection:text-white font-sans">
+    <div className="flex flex-col gap-6 bg-theme-main font-sans selection:bg-theme-accent selection:text-white pb-10">
       
       {/* Header Area */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 shrink-0">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
         <div>
-          <h1 className="text-3xl font-serif font-black text-theme-text tracking-tight">Driver Logs & Map</h1>
-          <p className="text-sm text-theme-muted font-medium mt-1">Live GPS tracking and shift details</p>
+          <h1 className="text-3xl font-serif font-black text-theme-text tracking-tight">Live Map</h1>
+          <p className="text-sm text-theme-muted font-medium mt-1">Real-time vehicle tracking and route coordination</p>
         </div>
         <div className="relative w-full md:w-80">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-theme-muted" size={18} />
@@ -173,48 +168,15 @@ export default function LiveMap() {
           
           {/* Main Map */}
           <div className="h-[350px] lg:h-[400px] bg-theme-sidebar rounded-[40px] overflow-hidden border border-white/50 relative shadow-sm">
-            {GOOGLE_MAPS_API_KEY ? (
-              <LoadScript googleMapsApiKey={GOOGLE_MAPS_API_KEY}>
-                <GoogleMap
-                  mapContainerStyle={{
-                    width: '100%',
-                    height: '100%',
-                    borderRadius: '40px',
-                  }}
-                  center={mapCenter}
-                  zoom={15}
-                  options={mapOptions}
-                >
-                  {/* Route Polyline */}
-                  {routeCoords.length > 1 && (
-                    <Polyline
-                      path={routeCoords}
-                      options={{
-                        strokeColor: '#FF6B35',
-                        strokeOpacity: 0.8,
-                        strokeWeight: 6,
-                      }}
-                    />
-                  )}
-                  
-                  {/* Truck Markers */}
-                  {trucks.map(truck => (
-                    <Marker
-                      key={truck.id}
-                      position={{ lat: truck.lat, lng: truck.lng }}
-                      title={`Truck ${truck.id}`}
-                      options={{
-                        icon: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png'
-                      }}
-                    />
-                  ))}
-                </GoogleMap>
-              </LoadScript>
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-theme-sidebar">
-                <p className="text-theme-muted font-bold">Google Maps API Key not configured</p>
-              </div>
-            )}
+            <MapContainer center={[6.9145, 79.8650]} zoom={15} className="h-full w-full z-0">
+              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+              <Polyline positions={routePath} color="var(--accent)" weight={6} opacity={0.8} lineCap="round" />
+              {trucksData.map(truck => (
+                <Marker key={truck.id} position={[truck.lat, truck.lng]}>
+                  <Popup><span className="font-bold">Truck {truck.id}</span><br/>{truck.location}</Popup>
+                </Marker>
+              ))}
+            </MapContainer>
             
             {/* Overlay Label Top Right */}
             <div className="absolute top-6 right-6 z-[1000] bg-white/90 text-theme-text p-4 rounded-3xl shadow-xl flex items-center gap-3 backdrop-blur-md border border-white">

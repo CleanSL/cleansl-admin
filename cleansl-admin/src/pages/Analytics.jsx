@@ -78,9 +78,9 @@ export default function ReportsAnalytics() {
 
       {/* Top Banner Stats */}
       <div className="flex flex-wrap gap-6">
-        <AnalyticsCard title="Waste Collected" value={ANALYTICS_TOTALS.waste.value} trend={ANALYTICS_TOTALS.waste.trend} icon={<Recycle size={24}/>} color="bg-theme-sidebar text-theme-accent border border-white/50" />
-        <AnalyticsCard title="Total Pickups" value={ANALYTICS_TOTALS.pickups.value} trend={ANALYTICS_TOTALS.pickups.trend} icon={<Truck size={24}/>} color="bg-theme-sidebar text-theme-accent border border-white/50" />
-        <AnalyticsCard title="Active Users" value={ANALYTICS_TOTALS.users.value} trend={ANALYTICS_TOTALS.users.trend} icon={<Users size={24}/>} color="bg-theme-sidebar text-theme-accent border border-white/50" />
+        <AnalyticsCard title="Waste Collected" value={analyticsData.totals.waste.value} trend={analyticsData.totals.waste.trend} icon={<Recycle size={24}/>} color="bg-theme-sidebar text-theme-accent border border-white/50" />
+        <AnalyticsCard title="Total Pickups" value={analyticsData.totals.pickups.value} trend={analyticsData.totals.pickups.trend} icon={<Truck size={24}/>} color="bg-theme-sidebar text-theme-accent border border-white/50" />
+        <AnalyticsCard title="Active Users" value={analyticsData.totals.users.value} trend={analyticsData.totals.users.trend} icon={<Users size={24}/>} color="bg-theme-sidebar text-theme-accent border border-white/50" />
       </div>
 
       {/* Sub-Tab Navigation */}
@@ -155,6 +155,37 @@ const CollectionAnalyticsView = ({ trends = [], waste = [] }) => {
 
 const DriverPerformanceView = ({ drivers = [] }) => {
   const defaultDrivers = drivers.length > 0 ? drivers : [];
+  const USER_GROWTH = [
+    { month: 'Jan', total: 800 }, { month: 'Mar', total: 950 }, 
+    { month: 'Jun', total: 1100 }, { month: 'Sep', total: 1200 }, { month: 'Nov', total: 1264 }
+  ];
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="bg-theme-card p-8 rounded-[40px] shadow-sm border border-white/40">
+        <h4 className="font-black text-theme-muted mb-8 uppercase text-xs tracking-widest flex items-center gap-2"><Users size={16} className="text-theme-accent"/> User Growth Over Time</h4>
+        <div className="h-[300px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={USER_GROWTH}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#ffffff" strokeOpacity={0.4} />
+              <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 700, fill: 'var(--text-muted)'}} dy={10} />
+              <YAxis axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 700, fill: 'var(--text-muted)'}} />
+              <Tooltip contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+              <Line type="monotone" dataKey="total" stroke="var(--accent)" strokeWidth={4} dot={{ r: 6, fill: 'var(--accent)', strokeWidth: 0 }} activeDot={{ r: 8, strokeWidth: 0 }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pb-8">
+        <StatBox label="Total Users" value="1,264" sub="+419 new this year" />
+        <StatBox label="Avg. Monthly Growth" value="+38" sub="3.1% growth rate" />
+        <StatBox label="Retention Rate" value="89%" sub="+2.3% vs last quarter" />
+      </div>
+    </div>
+  );
+};
+
+const UserGrowthView = () => {
   const USER_GROWTH = [
     { month: 'Jan', total: 800 }, { month: 'Mar', total: 950 }, 
     { month: 'Jun', total: 1100 }, { month: 'Sep', total: 1200 }, { month: 'Nov', total: 1264 }

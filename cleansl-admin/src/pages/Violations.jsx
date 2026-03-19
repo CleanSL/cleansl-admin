@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -16,7 +16,11 @@ import {
   ArrowDownRight
 } from 'lucide-react';
 
-import { violationAPI } from '../services/api';
+import { 
+  VIOLATION_STATS, 
+  VIOLATIONS_TABLE, 
+  VIOLATION_LOCATIONS 
+} from '../data/mockData';
 
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
@@ -47,66 +51,6 @@ export default function Violations() {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTypeFilter, setActiveTypeFilter] = useState('All');
   const [selectedDate, setSelectedDate] = useState('');
-  const [stats, setStats] = useState([]);
-  const [violations, setViolations] = useState([]);
-  const [violationLocations, setViolationLocations] = useState([
-    [6.9145, 79.8650],
-    [6.9200, 79.8700],
-    [6.9100, 79.8600],
-    [6.9150, 79.8750]
-  ]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const statsResponse = await violationAPI.getStats();
-        const violationsResponse = await violationAPI.getAll();
-
-        // Format stats
-        const formattedStats = [
-          { label: "Total Violations", value: statsResponse.total?.toString() || "0", color: "text-red-600", trend: "+12%" },
-          { label: "Pending Review", value: statsResponse.pending?.toString() || "0", color: "text-orange-600", trend: "-3%" },
-          { label: "Confirmed", value: statsResponse.confirmed?.toString() || "0", color: "text-red-600", trend: "+5%" },
-          { label: "Resolved", value: statsResponse.resolved?.toString() || "0", color: "text-green-600", trend: "+8%" }
-        ];
-        setStats(formattedStats);
-
-        // Format violations for table
-        const formattedViolations = violationsResponse.map(v => ({
-          date: new Date(v.date).toISOString().split('T')[0],
-          type: v.type,
-          resident: v.resident,
-          status: v.status,
-          score: v.score
-        }));
-        setViolations(formattedViolations);
-      } catch (error) {
-        console.error('Error fetching violations:', error);
-        // Set fallback stats
-        setStats([
-          { label: "Total Violations", value: "124", color: "text-red-600", trend: "+12%" },
-          { label: "Pending Review", value: "28", color: "text-orange-600", trend: "-3%" },
-          { label: "Confirmed", value: "67", color: "text-red-600", trend: "+5%" },
-          { label: "Resolved", value: "29", color: "text-green-600", trend: "+8%" }
-        ]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const VIOLATION_STATS = stats.length > 0 ? stats : [
-    { label: "Total Violations", value: "0", color: "text-red-600", trend: "+12%" },
-    { label: "Pending Review", value: "0", color: "text-orange-600", trend: "-3%" },
-    { label: "Confirmed", value: "0", color: "text-red-600", trend: "+5%" },
-    { label: "Resolved", value: "0", color: "text-green-600", trend: "+8%" }
-  ];
-
-  const VIOLATIONS_TABLE = violations;
 
   const filteredViolations = useMemo(() => {
     return VIOLATIONS_TABLE.filter(item => {
@@ -122,9 +66,17 @@ export default function Violations() {
   }, [searchTerm, activeTypeFilter, selectedDate]);
 
   return (
-    <div className="flex flex-col gap-6 bg-theme-main p-8 h-full overflow-y-auto font-sans selection:bg-theme-accent selection:text-white">
+    <div className="flex flex-col gap-6 bg-theme-main font-sans selection:bg-theme-accent selection:text-white pb-10">
       
-      {/* Header & Filters */}
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-serif font-black text-theme-text tracking-tight">Violations</h1>
+          <p className="text-sm text-theme-muted font-medium mt-1">Monitor and manage waste sorting infractions</p>
+        </div>
+      </div>
+
+      {/* Analytics & Filters Banner */}
       <div className="flex flex-col xl:flex-row justify-between items-center gap-4 bg-theme-sidebar p-5 rounded-[28px] shadow-sm border border-white/40">
          <div className="relative w-full xl:w-96">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-theme-muted" size={18} />
@@ -248,7 +200,7 @@ export default function Violations() {
              <div className="h-80 rounded-[30px] overflow-hidden border border-white/50 z-0 shadow-inner">
                 <MapContainer center={[6.9145, 79.8650]} zoom={14} className="h-full w-full relative z-0">
                   <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                  {violationLocations.map((pos, i) => (
+                  {VIOLATION_LOCATIONS.map((pos, i) => (
                     <Marker key={i} position={pos}>
                       <Popup><span className="font-bold">Incident Log #{i+1}</span></Popup>
                     </Marker>
