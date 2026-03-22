@@ -11,6 +11,7 @@ import {
   FileText
 } from 'lucide-react';
 import { COMPLAINT_STATS, COMPLAINTS_LIST } from '../data/mockData';
+import { complaintAPI } from '../services/api';
 
 const PriorityBadge = ({ level }) => {
   const styles = {
@@ -41,8 +42,21 @@ export default function Complaints() {
   const [statusFilter, setStatusFilter] = useState('All Status');
   const [priorityFilter, setPriorityFilter] = useState('All Priority');
 
+  const [complaints, setComplaints] = useState(COMPLAINTS_LIST);
+  const [stats, setStats] = useState(COMPLAINT_STATS);
+
+  React.useEffect(() => {
+    complaintAPI.getAll().then(data => {
+      if (data && Array.isArray(data) && data.length > 0) setComplaints(data);
+    }).catch(e => console.log('Using mock complaints list', e));
+
+    complaintAPI.getStats().then(data => {
+      if (data && Array.isArray(data) && data.length > 0) setStats(data);
+    }).catch(e => console.log('Using mock complaints stats', e));
+  }, []);
+
   const filteredComplaints = useMemo(() => {
-    return COMPLAINTS_LIST.filter(item => {
+    return complaints.filter(item => {
       const matchesSearch = 
         item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -64,13 +78,13 @@ export default function Complaints() {
           <p className="text-sm text-theme-muted font-medium mt-1">Track and resolve customer complaints</p>
         </div>
         <div className="flex items-center bg-theme-sidebar px-4 py-2 rounded-full text-xs font-bold text-theme-muted border border-white/50">
-          Total: {COMPLAINTS_LIST.length}
+          Total: {complaints.length}
         </div>
       </div>
 
       {/* Top Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {COMPLAINT_STATS.map((stat, i) => {
+        {stats.map((stat, i) => {
           let StatIcon = FileText;
           if (stat.label === "Pending") StatIcon = Clock;
           if (stat.label === "In Progress") StatIcon = AlertCircle;

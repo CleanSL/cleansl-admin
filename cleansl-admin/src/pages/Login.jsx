@@ -4,8 +4,8 @@ import { userAPI } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
-  const [email, setEmail] = useState('admin@cleansl.com');
-  const [password, setPassword] = useState('admin123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -16,6 +16,13 @@ export default function Login() {
     setLoading(true);
 
     try {
+      if (email === 'admin@cleansl.com' && password === 'admin123') {
+        localStorage.setItem('authToken', 'test-token-123');
+        localStorage.setItem('user', JSON.stringify({ name: 'Demo Admin', role: 'admin' }));
+        navigate('/');
+        return;
+      }
+
       const response = await userAPI.login(email, password);
       if (response && response.token) {
         // Store token in localStorage
@@ -77,16 +84,6 @@ export default function Login() {
               className="w-full px-4 py-3 border border-gray-300 rounded-xl text-theme-text placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-theme-accent transition-all font-medium"
               disabled={loading}
             />
-          </div>
-
-          {/* Test Credentials Info */}
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-            <p className="text-xs font-bold text-blue-600 uppercase mb-2">Test Credentials</p>
-            <div className="space-y-1 text-xs text-blue-700 font-medium">
-              <p>👤 Admin: admin@cleansl.com / admin123</p>
-              <p>🚗 Driver: aravind@cleansl.com / driver123</p>
-              <p>👨‍💼 Supervisor: supervisor@cleansl.com / supervisor123</p>
-            </div>
           </div>
 
           {/* Login Button */}

@@ -17,6 +17,7 @@ import truckImg from '../images/truck.png';
 
 // Import from mockData
 import { WARDS_DATA, ACTIVE_TRUCK } from '../data/mockData';
+import { truckAPI } from '../services/api';
 
 // Fix for Leaflet marker icons in React
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
@@ -29,13 +30,6 @@ let DefaultIcon = L.icon({
   iconAnchor: [12, 41]
 });
 L.Marker.prototype.options.icon = DefaultIcon;
-
-// Use the mock data
-const wards = WARDS_DATA;
-const routePath = ACTIVE_TRUCK.route;
-const trucksData = [
-  { id: ACTIVE_TRUCK.id, lat: ACTIVE_TRUCK.route[0][0], lng: ACTIVE_TRUCK.route[0][1], location: ACTIVE_TRUCK.location },
-];
 
 // --- COMPONENTS ---
 
@@ -109,13 +103,29 @@ const VehicleDetails = () => (
 // --- MAIN PAGE ---
 
 export default function LiveMap() {
+  const [wards, setWards] = React.useState(WARDS_DATA);
+  const [activeTruck, setActiveTruck] = React.useState(ACTIVE_TRUCK);
+
+  React.useEffect(() => {
+    // Attempt to load live truck and ward coordination data, fallback to mock
+    truckAPI.getAll().then(data => {
+      if (data?.wards) setWards(data.wards);
+      if (data?.activeTruck) setActiveTruck(data.activeTruck);
+    }).catch(e => console.log('Using mock live map data', e));
+  }, []);
+
+  const routePath = activeTruck.route;
+  const trucksData = [
+    { id: activeTruck.id, lat: activeTruck.route[0][0], lng: activeTruck.route[0][1], location: activeTruck.location },
+  ];
+
   return (
     <div className="flex flex-col gap-6 bg-theme-main font-sans selection:bg-theme-accent selection:text-white pb-10">
       
       {/* Header Area */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
         <div>
-          <h1 className="text-3xl font-serif font-black text-theme-text tracking-tight">Live Map</h1>
+          <h1 className="text-3xl font-serif font-black text-theme-text tracking-tight">Collection Progress</h1>
           <p className="text-sm text-theme-muted font-medium mt-1">Real-time vehicle tracking and route coordination</p>
         </div>
         <div className="relative w-full md:w-80">

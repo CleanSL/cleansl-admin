@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart as RechartsPie, Pie, Cell } from 'recharts';
 import { Truck, AlertTriangle, Map, FileText, ArrowUpRight, ArrowDownRight, CheckCircle2, Search } from 'lucide-react';
 import { MOCK_STATS, MOCK_OPERATIONS } from '../data/mockData';
+import { analyticsAPI } from '../services/api';
 
 // --- Reusable Stat Card ---
 const StatCard = ({ title, value, trend, isNegative, icon, subtitle }) => (
@@ -54,6 +55,18 @@ const FeedRow = ({ num, event, detail, time, status, color }) => {
 export default function Overview() {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('all');
+  
+  const [stats, setStats] = useState(MOCK_STATS);
+  const [operations, setOperations] = useState(MOCK_OPERATIONS);
+
+  React.useEffect(() => {
+    analyticsAPI.getDashboardStats()
+      .then(data => {
+        if (data?.stats) setStats(data.stats);
+        if (data?.operations) setOperations(data.operations);
+      })
+      .catch((err) => console.log('Using mock dashboard data', err));
+  }, []);
 
   // Mock Data for Area Chart
   const chartData = [
@@ -63,12 +76,12 @@ export default function Overview() {
     { name: 'Dec 30', tons: 18 }
   ];
 
-  const gaugeData = [{ name: 'Efficiency', value: parseInt(MOCK_STATS.efficiency) }, { name: 'Remainder', value: 100 - parseInt(MOCK_STATS.efficiency) }];
+  const gaugeData = [{ name: 'Efficiency', value: parseInt(stats.efficiency) }, { name: 'Remainder', value: 100 - parseInt(stats.efficiency) }];
   const COLORS = ['var(--accent)', '#DDE8CD'];
 
   const filteredOperations = useMemo(() => {
     const q = (query || '').trim().toLowerCase();
-    return MOCK_OPERATIONS.filter(op => {
+    return operations.filter(op => {
       const matchSearch = op.event.toLowerCase().includes(q) || op.detail.toLowerCase().includes(q);
       const matchFilter = filter === 'all' ||
         (filter === 'pickups' && op.event.toLowerCase().includes('collection')) ||
@@ -81,10 +94,10 @@ export default function Overview() {
     <div className="max-w-[1400px] mx-auto">
       {/* TOP 4 STAT CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
-        <StatCard title="Total Pickups" value={MOCK_STATS.totalPickups.toString()} trend="+12%" subtitle="this week" icon={<Truck size={16} />} />
-        <StatCard title="Missed Pickups" value={MOCK_STATS.missedPickups.toString()} trend="-2%" subtitle="this week" isNegative={true} icon={<AlertTriangle size={16} />} />
-        <StatCard title="Active Trucks" value={MOCK_STATS.activeTrucks.toString().padStart(2, '0')} trend={`+${MOCK_STATS.activeTrucks} active`} subtitle="" icon={<Map size={16} />} />
-        <StatCard title="New Complaints" value={MOCK_STATS.newComplaints.toString().padStart(2, '0')} trend="Pending" subtitle="queue" icon={<FileText size={16} />} />
+        <StatCard title="Total Pickups" value={stats.totalPickups.toString()} trend="+12%" subtitle="this week" icon={<Truck size={16} />} />
+        <StatCard title="Missed Pickups" value={stats.missedPickups.toString()} trend="-2%" subtitle="this week" isNegative={true} icon={<AlertTriangle size={16} />} />
+        <StatCard title="Active Trucks" value={stats.activeTrucks.toString().padStart(2, '0')} trend={`+${stats.activeTrucks} active`} subtitle="" icon={<Map size={16} />} />
+        <StatCard title="New Complaints" value={stats.newComplaints.toString().padStart(2, '0')} trend="Pending" subtitle="queue" icon={<FileText size={16} />} />
       </div>
 
       {/* MIDDLE CHARTS ROW */}
@@ -154,7 +167,7 @@ export default function Overview() {
               </RechartsPie>
             </ResponsiveContainer>
             <div className="absolute bottom-4 text-5xl font-bold font-serif text-theme-text">
-              {MOCK_STATS.efficiency}
+              {stats.efficiency}
             </div>
           </div>
 
