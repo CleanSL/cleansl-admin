@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { 
   Search, 
+  User,
   Calendar, 
   ChevronDown, 
   Download, 
@@ -33,8 +34,8 @@ L.Marker.prototype.options.icon = DefaultIcon;
 const AvatarGroup = ({ count }) => (
   <div className="flex -space-x-2 items-center">
     {[1, 2, 3].map(i => (
-      <div key={i} className="w-8 h-8 rounded-full border-2 border-theme-sidebar bg-slate-200 overflow-hidden shadow-sm">
-        <img src={`https://i.pravatar.cc/100?img=${i + 10}`} alt="avatar" />
+      <div key={i} className="w-8 h-8 rounded-full border-2 border-theme-sidebar bg-theme-accent/10 flex items-center justify-center shrink-0 shadow-sm">
+         <User size={14} className="text-theme-accent" />
       </div>
     ))}
     {count && <span className="text-xs font-bold text-theme-muted ml-3">+{count}</span>}
@@ -148,10 +149,7 @@ export default function FleetStatus() {
                <table className="w-full text-left">
                   <thead className="bg-theme-sidebar">
                     <tr className="text-[9px] uppercase font-black text-theme-muted tracking-[0.2em] border-b border-white/20">
-                      <th className="px-6 py-4 w-10">
-                        <div className="w-4 h-4 rounded border-2 border-theme-muted/30"></div>
-                      </th>
-                      <th className="px-3 py-4">Driver</th>
+                      <th className="px-3 pl-6 py-4">Driver</th>
                       <th className="px-3 py-4 text-center">Average Week Active Hours</th>
                       <th className="px-3 py-4 text-center">Vehicle</th>
                       <th className="px-3 py-4">Route</th>
@@ -162,13 +160,10 @@ export default function FleetStatus() {
                   <tbody className="text-sm">
                     {drivers.filter(d => d.name.toLowerCase().includes(searchTerm.toLowerCase())).map((driver, i) => (
                       <tr key={i} className="border-b border-white/10 hover:bg-theme-sidebar transition-colors">
-                        <td className="px-6 py-4">
-                           <div className="w-4 h-4 rounded border-2 border-theme-accent flex items-center justify-center">
-                             {i === 2 && <div className="w-2 h-2 bg-theme-accent rounded-sm"/>}
+                        <td className="px-3 pl-6 py-4 flex items-center gap-3">
+                           <div className="w-8 h-8 rounded-full flex items-center justify-center bg-theme-accent/10 border border-theme-accent/30 text-theme-accent text-[10px] font-black tracking-widest shrink-0 shadow-sm">
+                             {driver.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
                            </div>
-                        </td>
-                        <td className="px-3 py-4 flex items-center gap-3">
-                           <img src={`https://i.pravatar.cc/150?u=${driver.id}`} alt="driver" className="w-8 h-8 rounded-full object-cover shadow-sm" />
                            <div>
                              <p className="text-xs font-black text-theme-text">{driver.name}</p>
                              <p className="text-[10px] text-theme-accent font-bold tracking-tighter">{driver.username}</p>
@@ -221,7 +216,9 @@ export default function FleetStatus() {
                    <Popup className="rounded-2xl overflow-hidden shadow-xl border-none p-0">
                      <div className="p-3 min-w-[160px] bg-theme-sidebar">
                        <div className="flex items-center gap-3 mb-3 border-b border-white/50 pb-3">
-                         <img src="https://i.pravatar.cc/150?u=4" alt="Driver" className="w-10 h-10 rounded-full border-2 border-theme-accent shadow-sm" />
+                         <div className="w-10 h-10 rounded-full flex items-center justify-center bg-theme-accent/10 border-2 border-theme-accent text-theme-accent shadow-sm shrink-0">
+                             <User size={20} />
+                         </div>
                          <div>
                             <p className="text-xs font-black text-theme-text">Driver_22</p>
                             <p className="text-[10px] text-theme-muted font-bold">Truck_004</p>

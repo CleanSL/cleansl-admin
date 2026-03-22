@@ -21,6 +21,7 @@ import {
   VIOLATIONS_TABLE, 
   VIOLATION_LOCATIONS 
 } from '../data/mockData';
+import { violationAPI } from '../services/api';
 
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
@@ -52,8 +53,21 @@ export default function Violations() {
   const [activeTypeFilter, setActiveTypeFilter] = useState('All');
   const [selectedDate, setSelectedDate] = useState('');
 
+  const [violations, setViolations] = useState(VIOLATIONS_TABLE);
+  const [stats, setStats] = useState(VIOLATION_STATS);
+
+  React.useEffect(() => {
+    violationAPI.getAll().then(data => {
+      if (data && Array.isArray(data) && data.length > 0) setViolations(data);
+    }).catch(e => console.log('Using mock violations list', e));
+
+    violationAPI.getStats().then(data => {
+      if (data && Array.isArray(data) && data.length > 0) setStats(data);
+    }).catch(e => console.log('Using mock violation stats', e));
+  }, []);
+
   const filteredViolations = useMemo(() => {
-    return VIOLATIONS_TABLE.filter(item => {
+    return violations.filter(item => {
       const matchesSearch = 
         item.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.resident.toLowerCase().includes(searchTerm.toLowerCase());
@@ -125,7 +139,7 @@ export default function Violations() {
         <div className="flex-[2] flex flex-col gap-8 min-w-0">
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {VIOLATION_STATS.map((stat, i) => {
+            {stats.map((stat, i) => {
               const icons = [
                 <AlertTriangle size={16} className="text-theme-accent" />, 
                 <Clock size={16} className="text-theme-accent" />, 
