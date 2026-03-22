@@ -8,9 +8,22 @@ def read_dashboard_summary():
     try:
         data = get_dashboard_summary()
         if data:
-            return data
-    except Exception:
-        pass
+            # Map Python backend schema to React frontend schema
+            return {
+                "stats": {
+                    "totalPickups": data.get("completed_tasks", 154),
+                    "missedPickups": data.get("total_complaints", 3),
+                    "activeTrucks": data.get("active_drivers", 8),
+                    "newComplaints": data.get("pending_complaints", 12),
+                    "efficiency": "88%"  # Hardcoded MVP
+                },
+                "operations": [
+                    {"id": 1, "event": "Live Supabase Connection", "detail": "Data synchronization active", "time": "Just now", "status": "Verified", "color": "green"}
+                ]
+            }
+    except Exception as e:
+        print("Error fetching analytics:", e)
+
     return {
         "stats": {
             "totalPickups": 154,
