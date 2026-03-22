@@ -34,10 +34,10 @@ const FeedRow = ({ num, event, detail, time, status, color }) => {
     <tr className="border-b border-white/20 hover:bg-theme-sidebar transition-colors cursor-pointer" onClick={() => alert(`Reviewing log: ${event}`)}>
       <td className="px-6 py-4 text-xs text-theme-muted font-bold">{num}</td>
       <td className="px-6 py-4 text-sm font-bold text-theme-text flex items-center gap-2">
-        {event.includes('Truck') ? <Truck size={14} className="text-theme-muted"/> : 
-         event.includes('Violation') ? <AlertTriangle size={14} className="text-red-400"/> : 
-         event.includes('Complaint') ? <FileText size={14} className="text-amber-400"/> :
-         <CheckCircle2 size={14} className="text-theme-accent"/>}
+        {event.includes('Truck') ? <Truck size={14} className="text-theme-muted" /> :
+          event.includes('Violation') ? <AlertTriangle size={14} className="text-red-400" /> :
+            event.includes('Complaint') ? <FileText size={14} className="text-amber-400" /> :
+              <CheckCircle2 size={14} className="text-theme-accent" />}
         {event}
       </td>
       <td className="px-6 py-4 text-sm text-theme-muted">{detail}</td>
@@ -70,9 +70,9 @@ export default function Overview() {
     const q = (query || '').trim().toLowerCase();
     return MOCK_OPERATIONS.filter(op => {
       const matchSearch = op.event.toLowerCase().includes(q) || op.detail.toLowerCase().includes(q);
-      const matchFilter = filter === 'all' || 
-          (filter === 'pickups' && op.event.toLowerCase().includes('collection')) || 
-          (filter === 'violations' && op.event.toLowerCase().includes('violation'));
+      const matchFilter = filter === 'all' ||
+        (filter === 'pickups' && op.event.toLowerCase().includes('collection')) ||
+        (filter === 'violations' && op.event.toLowerCase().includes('violation'));
       return matchSearch && matchFilter;
     });
   }, [query, filter]);
@@ -89,7 +89,7 @@ export default function Overview() {
 
       {/* MIDDLE CHARTS ROW */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
-        
+
         {/* AREA CHART */}
         <div className="xl:col-span-2 bg-theme-card rounded-[32px] p-8 shadow-sm border border-white/40">
           <div className="flex justify-between items-center mb-6">
@@ -105,13 +105,13 @@ export default function Overview() {
               <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorTons" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--accent)" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="var(--accent)" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="var(--accent)" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="var(--accent)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: 'var(--text-muted)', fontSize: 12, fontWeight: 500}} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{fill: 'var(--text-muted)', fontSize: 12, fontWeight: 500}} tickFormatter={(t) => `${t}t`} />
-                <Tooltip 
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--text-muted)', fontSize: 12, fontWeight: 500 }} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--text-muted)', fontSize: 12, fontWeight: 500 }} tickFormatter={(t) => `${t}t`} />
+                <Tooltip
                   contentStyle={{ backgroundColor: 'var(--bg-main)', borderRadius: '16px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                   itemStyle={{ color: 'var(--text-dark)', fontWeight: 'bold' }}
                 />
@@ -128,9 +128,9 @@ export default function Overview() {
             <p className="text-sm font-medium text-theme-muted">Live Performance</p>
           </div>
           <div className="flex items-center gap-2 text-theme-text font-semibold text-sm mb-4">
-            <ArrowUpRight size={16} className="text-theme-accent"/> <span className="text-theme-accent">+35%</span> Increase vs. Manual
+            <ArrowUpRight size={16} className="text-theme-accent" /> <span className="text-theme-accent">+35%</span> Increase vs. Manual
           </div>
-          
+
           <div className="relative h-48 w-full flex items-center justify-center translate-y-4">
             <ResponsiveContainer width="100%" height="100%">
               <RechartsPie>
@@ -177,7 +177,7 @@ export default function Overview() {
       <div className="bg-theme-card rounded-[32px] shadow-sm border border-white/40 overflow-hidden">
         <div className="px-8 py-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <h4 className="font-bold text-theme-text font-serif text-xl">Live Operations Feed</h4>
-          
+
           <div className="flex items-center bg-theme-sidebar rounded-full flex-1 max-w-sm px-4 py-2 mx-8 shadow-inner border border-white/50">
             <Search className="text-theme-muted mr-3" size={16} />
             <input

@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutGrid, Map, FileText, AlertTriangle, Truck, 
   PieChart, Settings as SettingsIcon, User, Search, 
-  Calendar
+  Calendar, LogOut
 } from 'lucide-react';
 
 // --- Reusable Navigation Item ---
@@ -28,8 +28,28 @@ const NavItem = ({ icon, label, to, active }) => {
 
 const Dashboard = () => {
   const [timeRange, setTimeRange] = useState('Month');
+  const [user, setUser] = useState(null);
   const location = useLocation();
+  const navigate = useNavigate();
   const isOverview = location.pathname === '/';
+
+  useEffect(() => {
+    // Load user from localStorage
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (e) {
+        console.error('Failed to parse user:', e);
+      }
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
 
   return (
     <div className="flex h-screen bg-theme-main font-sans text-theme-text selection:bg-theme-accent selection:text-white overflow-hidden">
@@ -67,8 +87,12 @@ const Dashboard = () => {
       <main className="flex-1 flex flex-col overflow-hidden py-4 pr-4">
         
         {/* TOP HEADER */}
-        <header className="h-20 flex items-center justify-between px-6 shrink-0 rounded-[32px] mb-4">
-          <h2 className="text-3xl font-serif text-theme-text pr-4">Good Morning, <span className="text-theme-muted font-sans font-medium text-2xl">User</span></h2>
+        <header className="h-20 flex items-center justify-between px-6 shrink-0 rounded-[32px] mb-4 bg-theme-card border border-white/40">
+          <h2 className="text-3xl font-serif text-theme-text pr-4">
+            Good Morning, <span className="text-theme-accent font-sans font-bold text-2xl">
+              {user?.firstName || user?.email?.split('@')[0] || 'User'}
+            </span>
+          </h2>
           
           <div className="flex items-center gap-6 overflow-x-auto whitespace-nowrap custom-scrollbar pb-2 md:pb-0">
             <div className="relative shrink-0">
@@ -98,6 +122,15 @@ const Dashboard = () => {
             >
               <Calendar size={14} className="text-theme-muted" />
               1 Dec 2026 - 31 Dec 2026
+            </button>
+
+            {/* Logout Button */}
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 bg-red-50 px-4 py-2 rounded-full text-xs font-bold text-red-600 border border-red-200 shadow-sm hover:bg-red-100 transition-colors shrink-0"
+            >
+              <LogOut size={14} />
+              Logout
             </button>
           </div>
         </header>

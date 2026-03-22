@@ -66,9 +66,17 @@ export default function Violations() {
   }, [searchTerm, activeTypeFilter, selectedDate]);
 
   return (
-    <div className="flex flex-col gap-6 bg-theme-main p-8 h-full overflow-y-auto font-sans selection:bg-theme-accent selection:text-white">
+    <div className="flex flex-col gap-6 bg-theme-main font-sans selection:bg-theme-accent selection:text-white pb-10">
       
-      {/* Header & Filters */}
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-serif font-black text-theme-text tracking-tight">Violations</h1>
+          <p className="text-sm text-theme-muted font-medium mt-1">Monitor and manage waste sorting infractions</p>
+        </div>
+      </div>
+
+      {/* Analytics & Filters Banner */}
       <div className="flex flex-col xl:flex-row justify-between items-center gap-4 bg-theme-sidebar p-5 rounded-[28px] shadow-sm border border-white/40">
          <div className="relative w-full xl:w-96">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-theme-muted" size={18} />

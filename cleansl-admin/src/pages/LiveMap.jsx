@@ -110,13 +110,13 @@ const VehicleDetails = () => (
 
 export default function LiveMap() {
   return (
-    <div className="flex flex-col h-full gap-6 bg-theme-main p-4 md:p-8 overflow-y-auto selection:bg-theme-accent selection:text-white font-sans">
+    <div className="flex flex-col gap-6 bg-theme-main font-sans selection:bg-theme-accent selection:text-white pb-10">
       
       {/* Header Area */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 shrink-0">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
         <div>
-          <h1 className="text-3xl font-serif font-black text-theme-text tracking-tight">Driver Logs & Map</h1>
-          <p className="text-sm text-theme-muted font-medium mt-1">Live GPS tracking and shift details</p>
+          <h1 className="text-3xl font-serif font-black text-theme-text tracking-tight">Live Map</h1>
+          <p className="text-sm text-theme-muted font-medium mt-1">Real-time vehicle tracking and route coordination</p>
         </div>
         <div className="relative w-full md:w-80">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-theme-muted" size={18} />
