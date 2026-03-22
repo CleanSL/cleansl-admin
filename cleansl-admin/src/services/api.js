@@ -1,8 +1,23 @@
 import axios from 'axios';
 
-// API configuration
-// Updated to proxy to the new FastAPI backend on port 8000
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+const DEFAULT_LOCAL_API_URL = 'http://localhost:8000';
+const DEFAULT_REMOTE_API_URL = 'https://cleansl-admin-1.onrender.com';
+
+const resolveApiBaseUrl = () => {
+  if (process.env.REACT_APP_API_URL) {
+    return process.env.REACT_APP_API_URL;
+  }
+
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    const isLocalHost = hostname === 'localhost' || hostname === '127.0.0.1';
+    return isLocalHost ? DEFAULT_LOCAL_API_URL : DEFAULT_REMOTE_API_URL;
+  }
+
+  return DEFAULT_LOCAL_API_URL;
+};
+
+const API_BASE_URL = resolveApiBaseUrl();
 
 const api = axios.create({
   baseURL: API_BASE_URL,

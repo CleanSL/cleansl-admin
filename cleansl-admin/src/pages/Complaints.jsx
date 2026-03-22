@@ -15,6 +15,65 @@ import {
 import { COMPLAINT_STATS, COMPLAINTS_LIST } from '../data/mockData';
 import { complaintAPI } from '../services/api';
 
+const formatComplaintDate = (value) => {
+  if (!value) return 'Unknown date';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toISOString().split('T')[0];
+};
+
+const mapComplaintStatus = (status) => {
+  const normalized = String(status || '').toLowerCase();
+  if (normalized === 'pending') return 'Pending';
+  if (normalized === 'reviewed' || normalized === 'in_progress' || normalized === 'in-progress') return 'In Progress';
+  if (normalized === 'resolved') return 'Resolved';
+  if (normalized === 'rejected' || normalized === 'closed') return 'Closed';
+  return 'Pending';
+};
+
+const mapComplaintPriority = (priority) => {
+  const normalized = String(priority || '').toLowerCase();
+  if (normalized === 'high') return 'High';
+  if (normalized === 'medium') return 'Medium';
+  if (normalized === 'low') return 'Low';
+  return 'Medium';
+};
+
+const normalizeComplaint = (complaint) => {
+  if (!complaint || typeof complaint !== 'object') return null;
+
+  const alreadyFormatted = complaint.title && complaint.description;
+  if (alreadyFormatted) {
+    return complaint;
+  }
+
+  return {
+    id: complaint.id || complaint.complaint_id || `complaint-${Math.random().toString(36).slice(2, 8)}`,
+    title: complaint.location_name || complaint.street_address || 'Resident Complaint',
+    priority: mapComplaintPriority(complaint.priority || complaint.priority_level),
+    description: complaint.complaint_text || complaint.description || complaint.authority_notes || 'No complaint description available.',
+    customer: complaint.customer || complaint.full_name || complaint.resident_name || complaint.resident_id || 'Resident',
+    category: complaint.category || 'General',
+    date: formatComplaintDate(complaint.created_at || complaint.date),
+    status: mapComplaintStatus(complaint.status),
+    assignedTo: complaint.assignedTo || complaint.assigned_to || null
+  };
+};
+
+const parseComplaintDate = (complaint) => {
+  const parsed = Date.parse(complaint?.rawCreatedAt || complaint?.date || '');
+  return Number.isNaN(parsed) ? 0 : parsed;
+};
+
+const mergeComplaints = (liveComplaints = []) => {
+  const merged = [...liveComplaints, ...COMPLAINTS_LIST];
+  const unique = Array.from(
+    new Map(merged.map(item => [item.id, item])).values()
+  );
+
+  return unique.sort((a, b) => parseComplaintDate(b) - parseComplaintDate(a));
+};
+
 const PriorityBadge = ({ level }) => {
   const styles = {
     High: "bg-orange-100 text-orange-600",
@@ -158,12 +217,19 @@ export default function Complaints() {
   React.useEffect(() => {
     complaintAPI.getAll().then(data => {
       if (data && Array.isArray(data)) {
-        const validData = data.filter(c => (c.title && c.title.trim() !== '') || (c.description && c.description.trim() !== ''));
-        const merged = [...validData, ...COMPLAINTS_LIST];
-        const unique = Array.from(new Map(merged.map(item => [item.id, item])).values());
-        setComplaints(unique);
+        const normalized = data
+          .map(normalizeComplaint)
+          .filter(item => item && ((item.title && item.title.trim() !== '') || (item.description && item.description.trim() !== '')))
+          .map(item => ({
+            ...item,
+            rawCreatedAt: item.date
+          }));
+        setComplaints(mergeComplaints(normalized));
       }
-    }).catch(e => console.log('Using mock complaints list', e));
+    }).catch(e => {
+      console.log('Using mock complaints list', e);
+      setComplaints(COMPLAINTS_LIST);
+    });
 
     complaintAPI.getStats().then(data => {
       if (data && Array.isArray(data) && data.length > 0) setStats(data);

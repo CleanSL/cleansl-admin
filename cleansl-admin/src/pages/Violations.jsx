@@ -34,6 +34,31 @@ let DefaultIcon = L.icon({
 });
 L.Marker.prototype.options.icon = DefaultIcon;
 
+const parseViolationDate = (value) => {
+  const parsed = Date.parse(value || '');
+  if (!Number.isNaN(parsed)) return parsed;
+
+  const parts = String(value || '').split('/');
+  if (parts.length === 3) {
+    const [day, month, year] = parts.map(Number);
+    const fallback = new Date(year, month - 1, day).getTime();
+    return Number.isNaN(fallback) ? 0 : fallback;
+  }
+
+  return 0;
+};
+
+const mergeViolations = (liveViolations = []) => {
+  const merged = [...liveViolations, ...VIOLATIONS_TABLE];
+  const unique = Array.from(
+    new Map(merged.map((item, index) => [`${item.resident}-${item.date}-${item.type}-${index < liveViolations.length ? 'live' : 'mock'}`, item])).values()
+  );
+
+  return unique
+    .sort((a, b) => parseViolationDate(b.date) - parseViolationDate(a.date))
+    .slice(0, 15);
+};
+
 const StatusBadge = ({ status }) => {
   const statusConfig = {
     Pending: { label: "Pending", bg: "bg-pink-100", text: "text-pink-600", border: "border-pink-200" },
@@ -134,11 +159,12 @@ export default function Violations() {
   React.useEffect(() => {
     violationAPI.getAll().then(data => {
       if (data && Array.isArray(data)) {
-        const merged = [...data, ...VIOLATIONS_TABLE];
-        const unique = Array.from(new Map(merged.map(item => [item.resident + item.date, item])).values());
-        setViolations(unique.slice(0, 15));
+        setViolations(mergeViolations(data));
       }
-    }).catch(e => console.log('Using mock violations list', e));
+    }).catch(e => {
+      console.log('Using mock violations list', e);
+      setViolations(VIOLATIONS_TABLE);
+    });
 
     violationAPI.getStats().then(data => {
       if (data && Array.isArray(data) && data.length > 0) setStats(data);

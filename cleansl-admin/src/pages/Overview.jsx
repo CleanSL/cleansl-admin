@@ -5,6 +5,27 @@ import { Truck, AlertTriangle, Map, FileText, ArrowUpRight, ArrowDownRight, Chec
 import { MOCK_STATS, MOCK_OPERATIONS } from '../data/mockData';
 import { analyticsAPI } from '../services/api';
 
+const parseOperationTime = (value) => {
+  const parsed = Date.parse(value || '');
+  return Number.isNaN(parsed) ? 0 : parsed;
+};
+
+const mergeOperations = (liveOperations = []) => {
+  const merged = [...liveOperations, ...MOCK_OPERATIONS];
+  const unique = Array.from(
+    new Map(
+      merged.map((item, index) => [
+        item.id || `${item.event}-${item.detail}-${index}`,
+        item
+      ])
+    ).values()
+  );
+
+  return unique
+    .sort((a, b) => parseOperationTime(b.createdAt || b.time) - parseOperationTime(a.createdAt || a.time))
+    .slice(0, 15);
+};
+
 // --- Reusable Stat Card ---
 const StatCard = ({ title, value, trend, isNegative, icon, subtitle, onClick }) => (
   <div className="bg-theme-card rounded-[32px] p-6 shadow-sm flex flex-col justify-between border border-white/40 cursor-pointer hover:border-theme-accent transition-colors group" onClick={onClick}>
@@ -65,13 +86,14 @@ export default function Overview() {
     analyticsAPI.getDashboardStats()
       .then(data => {
         if (data?.stats) setStats(data.stats);
-        if (data?.operations) {
-          const merged = [...data.operations, ...MOCK_OPERATIONS];
-          const unique = Array.from(new Map(merged.map(item => [item.id, item])).values());
-          setOperations(unique.slice(0, 15));
+        if (Array.isArray(data?.operations)) {
+          setOperations(mergeOperations(data.operations));
         }
       })
-      .catch((err) => console.log('Using mock dashboard data', err));
+      .catch((err) => {
+        console.log('Using mock dashboard data', err);
+        setOperations(MOCK_OPERATIONS);
+      });
   }, []);
 
   // Mock Data for Area Chart
