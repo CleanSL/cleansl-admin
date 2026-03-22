@@ -8,7 +8,9 @@ import {
   CheckCircle2, 
   AlertCircle, 
   XCircle,
-  FileText
+  FileText,
+  X,
+  Trash2
 } from 'lucide-react';
 import { COMPLAINT_STATS, COMPLAINTS_LIST } from '../data/mockData';
 import { complaintAPI } from '../services/api';
@@ -32,7 +34,102 @@ const StatusLabel = ({ status }) => {
   };
   return (
     <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-theme-muted">
-      {icons[status]} {status}
+      {icons[status] || icons['Pending']} {status}
+    </div>
+  );
+};
+
+const ComplaintModal = ({ isOpen, onClose, complaint, onUpdateStatus }) => {
+  const [localStatus, setLocalStatus] = useState(complaint?.status || 'Pending');
+
+  React.useEffect(() => {
+    if (complaint) setLocalStatus(complaint.status);
+  }, [complaint]);
+
+  if (!isOpen || !complaint) return null;
+
+  const handleSave = () => {
+    onUpdateStatus(complaint.id, localStatus);
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 bg-theme-main/80 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+      <div className="bg-theme-sidebar border border-white/40 rounded-[32px] w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="flex justify-between items-center p-6 border-b border-white/20 shrink-0">
+          <h2 className="text-xl font-serif font-black text-theme-text">Complaint Details</h2>
+          <button onClick={onClose} className="p-2 bg-theme-main text-theme-muted rounded-full hover:text-theme-accent transition-colors">
+            <X size={16} />
+          </button>
+        </div>
+        
+        <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
+           <div className="flex justify-between items-start mb-6">
+              <div>
+                 <h3 className="text-sm font-black text-theme-text tracking-tight">{complaint.title}</h3>
+                 <p className="text-xs text-theme-muted font-bold mt-1">ID: {complaint.id} • {complaint.date}</p>
+              </div>
+              <span className={`text-[10px] px-3 py-1 rounded-full font-black uppercase tracking-widest ${
+                complaint.priority === 'High' ? 'bg-red-50 text-red-600 border border-red-100' :
+                complaint.priority === 'Medium' ? 'bg-orange-50 text-orange-600 border border-orange-100' :
+                'bg-emerald-50 text-emerald-600 border border-emerald-100'
+              }`}>
+                {complaint.priority || 'Normal'} Priority
+              </span>
+           </div>
+
+           <div className="bg-white/30 p-4 rounded-2xl border border-white/20 mb-6">
+             <p className="text-xs text-theme-text font-medium leading-relaxed">{complaint.description}</p>
+           </div>
+
+           <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="bg-theme-main p-4 rounded-2xl shadow-inner border border-white/20">
+                <span className="text-[10px] font-black uppercase text-theme-muted tracking-widest block mb-1">Customer</span>
+                <span className="text-xs font-bold text-theme-text">{complaint.customer}</span>
+              </div>
+              <div className="bg-theme-main p-4 rounded-2xl shadow-inner border border-white/20">
+                <span className="text-[10px] font-black uppercase text-theme-muted tracking-widest block mb-1">Category</span>
+                <span className="text-xs font-bold text-theme-text">{complaint.category}</span>
+              </div>
+           </div>
+
+           <div className="mb-6">
+             <span className="text-[10px] font-black uppercase text-theme-muted tracking-widest block mb-3">Uploaded Evidence</span>
+             <div className="h-48 w-full bg-theme-main rounded-2xl overflow-hidden border border-white/40">
+                <img src={`https://images.unsplash.com/photo-1611284446314-60a58ac0deb9?auto=format&fit=crop&q=80&w=800`} alt="Evidence" className="w-full h-full object-cover mix-blend-multiply" />
+             </div>
+           </div>
+
+           <div>
+             <span className="text-[10px] font-black uppercase text-theme-muted tracking-widest block mb-3">Update Status</span>
+             <select 
+                className="w-full appearance-none px-4 py-3 bg-white rounded-xl text-xs font-bold text-theme-text border border-white/50 shadow-inner outline-none focus:ring-2 focus:ring-theme-accent cursor-pointer"
+                value={localStatus}
+                onChange={(e) => setLocalStatus(e.target.value)}
+              >
+                <option value="Pending">Pending</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Resolved">Resolved</option>
+                <option value="Closed">Closed</option>
+             </select>
+           </div>
+
+           <div className="mt-8 pt-6 border-t border-white/20 flex gap-4">
+              <button 
+                className="flex-1 py-3 bg-theme-main text-theme-text text-xs font-black uppercase rounded-xl border border-white/40 hover:bg-white/50 transition-colors"
+                onClick={onClose}
+              >
+                Cancel
+              </button>
+              <button 
+                className="flex-1 py-3 bg-theme-accent text-white text-xs font-black uppercase rounded-xl hover:opacity-90 transition-opacity shadow-md"
+                onClick={handleSave}
+              >
+                Save Changes
+              </button>
+           </div>
+        </div>
+      </div>
     </div>
   );
 };
@@ -44,11 +141,25 @@ export default function Complaints() {
 
   const [complaints, setComplaints] = useState(COMPLAINTS_LIST);
   const [stats, setStats] = useState(COMPLAINT_STATS);
+  const [selectedComplaint, setSelectedComplaint] = useState(null);
+  const [activeDropdown, setActiveDropdown] = useState(null);
+
+  const handleUpdateStatus = (id, newStatus) => {
+    setComplaints(prev => prev.map(c => c.id === id ? { ...c, status: newStatus } : c));
+    if (selectedComplaint && selectedComplaint.id === id) {
+      setSelectedComplaint(prev => ({ ...prev, status: newStatus }));
+    }
+  };
+
+  const handleDelete = (id) => {
+    setComplaints(prev => prev.filter(c => c.id !== id));
+  };
 
   React.useEffect(() => {
     complaintAPI.getAll().then(data => {
       if (data && Array.isArray(data)) {
-        const merged = [...data, ...COMPLAINTS_LIST];
+        const validData = data.filter(c => (c.title && c.title.trim() !== '') || (c.description && c.description.trim() !== ''));
+        const merged = [...validData, ...COMPLAINTS_LIST];
         const unique = Array.from(new Map(merged.map(item => [item.id, item])).values());
         setComplaints(unique);
       }
@@ -62,19 +173,26 @@ export default function Complaints() {
   const filteredComplaints = useMemo(() => {
     return complaints.filter(item => {
       const matchesSearch = 
-        item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.id.toLowerCase().includes(searchTerm.toLowerCase());
+        (item.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (item.customer || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        String(item.id || '').toLowerCase().includes(searchTerm.toLowerCase());
       
       const matchesStatus = statusFilter === 'All Status' || item.status === statusFilter;
       const matchesPriority = priorityFilter === 'All Priority' || item.priority === priorityFilter;
 
       return matchesSearch && matchesStatus && matchesPriority;
     });
-  }, [searchTerm, statusFilter, priorityFilter]);
+  }, [searchTerm, statusFilter, priorityFilter, complaints]);
 
   return (
     <div className="flex flex-col gap-6 bg-theme-main font-sans selection:bg-theme-accent selection:text-white pb-10">
+      <ComplaintModal 
+        isOpen={!!selectedComplaint} 
+        onClose={() => setSelectedComplaint(null)} 
+        complaint={selectedComplaint}
+        onUpdateStatus={handleUpdateStatus}
+      />
+      
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
@@ -179,10 +297,25 @@ export default function Complaints() {
                   {comp.assignedTo && <span>Assigned: <span className="text-theme-text">{comp.assignedTo}</span></span>}
                 </div>
                 <div className="flex items-center gap-2 w-full md:w-auto mt-2 md:mt-0">
-                  <button className="p-2 bg-theme-sidebar rounded-lg text-theme-muted hover:text-theme-accent transition-colors">
-                    <MoreHorizontal size={16}/>
-                  </button>
-                  <button className="flex-1 md:flex-none flex items-center justify-center gap-1.5 px-4 py-2 bg-theme-accent text-white text-[10px] font-black uppercase rounded-lg hover:opacity-90 transition-all shadow-md">
+                  <div className="relative">
+                    <button className="p-2 bg-theme-sidebar rounded-lg text-theme-muted hover:text-theme-accent transition-colors" onClick={() => setActiveDropdown(activeDropdown === comp.id ? null : comp.id)}>
+                      <MoreHorizontal size={16}/>
+                    </button>
+                    {activeDropdown === comp.id && (
+                      <div className="absolute right-0 bottom-full mb-2 w-48 bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] border border-white/50 py-2 z-50">
+                        <button 
+                          className="w-full text-left px-4 py-2.5 text-xs font-bold flex items-center gap-2 text-red-500 hover:bg-red-50 transition-colors"
+                          onClick={() => {
+                            handleDelete(comp.id);
+                            setActiveDropdown(null);
+                          }}
+                        >
+                          <Trash2 size={14} /> Remove Complaint
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  <button className="flex-1 md:flex-none flex items-center justify-center gap-1.5 px-4 py-2 bg-theme-accent text-white text-[10px] font-black uppercase rounded-lg hover:opacity-90 transition-all shadow-md" onClick={() => setSelectedComplaint(comp)}>
                     <Eye size={12}/> View Details
                   </button>
                 </div>
