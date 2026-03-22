@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 // API configuration
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+// Updated to proxy to the new FastAPI backend on port 8000
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -80,7 +81,7 @@ export const analyticsAPI = {
   create: (data) => api.post('/analytics', data).then(r => r.data).catch(handleError),
   getDistrictSummary: (params = {}) => api.get('/analytics/summary/district', { params }).then(r => r.data).catch(handleError),
   getPerformanceSummary: (params = {}) => api.get('/analytics/summary/performance', { params }).then(r => r.data).catch(handleError),
-  getDashboardStats: () => api.get('/analytics/dashboard-stats').then(r => r.data).catch(handleError),
+  getDashboardStats: () => api.get('/analytics/summary').then(r => r.data).catch(handleError),
   getMonthlyTrends: () => api.get('/analytics/monthly-trends').then(r => r.data).catch(handleError),
   getWasteDistribution: () => api.get('/analytics/waste-distribution').then(r => r.data).catch(handleError)
 };
