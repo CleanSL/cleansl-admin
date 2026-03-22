@@ -13,6 +13,8 @@ jobs:
 
       - name: Install dependencies
         run: npm install
+        working-directory: ./cleansl-admin/backend
 
       - name: Run simple test
         run: echo "Backend pipeline running successfully"
+        working-directory: ./backend
