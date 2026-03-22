@@ -47,7 +47,11 @@ export default function Complaints() {
 
   React.useEffect(() => {
     complaintAPI.getAll().then(data => {
-      if (data && Array.isArray(data) && data.length > 0) setComplaints(data);
+      if (data && Array.isArray(data)) {
+        const merged = [...data, ...COMPLAINTS_LIST];
+        const unique = Array.from(new Map(merged.map(item => [item.id, item])).values());
+        setComplaints(unique);
+      }
     }).catch(e => console.log('Using mock complaints list', e));
 
     complaintAPI.getStats().then(data => {

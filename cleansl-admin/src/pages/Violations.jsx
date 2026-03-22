@@ -58,7 +58,11 @@ export default function Violations() {
 
   React.useEffect(() => {
     violationAPI.getAll().then(data => {
-      if (data && Array.isArray(data) && data.length > 0) setViolations(data);
+      if (data && Array.isArray(data)) {
+        const merged = [...data, ...VIOLATIONS_TABLE];
+        const unique = Array.from(new Map(merged.map(item => [item.resident + item.date, item])).values());
+        setViolations(unique.slice(0, 15));
+      }
     }).catch(e => console.log('Using mock violations list', e));
 
     violationAPI.getStats().then(data => {

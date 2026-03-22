@@ -63,7 +63,11 @@ export default function Overview() {
     analyticsAPI.getDashboardStats()
       .then(data => {
         if (data?.stats) setStats(data.stats);
-        if (data?.operations) setOperations(data.operations);
+        if (data?.operations) {
+          const merged = [...data.operations, ...MOCK_OPERATIONS];
+          const unique = Array.from(new Map(merged.map(item => [item.id, item])).values());
+          setOperations(unique.slice(0, 15));
+        }
       })
       .catch((err) => console.log('Using mock dashboard data', err));
   }, []);
