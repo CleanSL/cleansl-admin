@@ -16,7 +16,7 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { CITIES_PROGRESS_DATA, SUCCESS_RATE_DATA } from '../data/mockData';
-import { userAPI } from '../services/api';
+import { userAPI, truckAPI } from '../services/api';
 
 // Fix for Leaflet marker icons in React
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
@@ -59,6 +59,7 @@ const DriverSummaryCard = ({ title, extraLabel, extraColor, avatars }) => (
 export default function FleetStatus() {
   const [searchTerm, setSearchTerm] = useState('');
   const [drivers, setDrivers] = useState([]);
+  const [activeRoute, setActiveRoute] = useState([[6.9145, 79.8650], [6.9080, 79.8700], [6.8900, 79.8600]]);
 
   React.useEffect(() => {
     userAPI.getAll().then(users => {
@@ -81,6 +82,12 @@ export default function FleetStatus() {
         { id: 3, name: 'Mike Davis', username: '@mike', hours: '8h', vehicle: 'TRK-003', route: 'Ward 3', status: 'Offline' }
       ]);
     });
+
+    truckAPI.getAll().then(data => {
+      if (data?.activeTruck?.route) {
+        setActiveRoute(data.activeTruck.route);
+      }
+    }).catch(() => null);
   }, []);
 
   return (
@@ -208,11 +215,11 @@ export default function FleetStatus() {
           <div className="bg-theme-card rounded-[32px] p-6 shadow-sm border border-white/30">
              <h3 className="font-serif font-black text-xl text-theme-text mb-4">Driver GPS Location Tracking</h3>
              <div className="h-[400px] w-full rounded-[24px] overflow-hidden border border-white shadow-inner relative z-0">
-               <MapContainer center={[6.9145, 79.8650]} zoom={14} className="h-full w-full">
+               <MapContainer center={activeRoute[0] || [6.9145, 79.8650]} zoom={14} className="h-full w-full">
                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                 <Polyline positions={[[6.9145, 79.8650], [6.9080, 79.8700], [6.8900, 79.8600]]} color="var(--accent)" weight={6} opacity={0.6} lineCap="round" />
+                 <Polyline positions={activeRoute} color="var(--accent)" weight={6} opacity={0.6} lineCap="round" />
                  
-                 <Marker position={[6.9080, 79.8700]}>
+                 <Marker position={activeRoute[0] || [6.9145, 79.8650]}>
                    <Popup className="rounded-2xl overflow-hidden shadow-xl border-none p-0">
                      <div className="p-3 min-w-[160px] bg-theme-sidebar">
                        <div className="flex items-center gap-3 mb-3 border-b border-white/50 pb-3">
