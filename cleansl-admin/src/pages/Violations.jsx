@@ -35,16 +35,57 @@ let DefaultIcon = L.icon({
 L.Marker.prototype.options.icon = DefaultIcon;
 
 const StatusBadge = ({ status }) => {
-  const styles = {
-    Pending: "bg-pink-100 text-pink-600",
-    Disputed: "bg-purple-100 text-purple-600",
-    Resolved: "bg-emerald-100 text-emerald-600",
-    Confirmed: "bg-orange-100 text-orange-600"
+  const statusConfig = {
+    Pending: { label: "Pending", bg: "bg-pink-100", text: "text-pink-600", border: "border-pink-200" },
+    Disputed: { label: "Disputed", bg: "bg-purple-100", text: "text-purple-600", border: "border-purple-200" },
+    Resolved: { label: "Resolved", bg: "bg-emerald-100", text: "text-emerald-600", border: "border-emerald-200" },
+    Confirmed: { label: "Confirmed", bg: "bg-orange-100", text: "text-orange-600", border: "border-orange-200" }
   };
+  const config = statusConfig[status] || { label: status, bg: "bg-gray-100", text: "text-gray-600", border: "border-gray-200" };
+
   return (
-    <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${styles[status]}`}>
-      {status}
-    </span>
+    <div className={`px-4 py-2 rounded-full text-xs font-black tracking-widest uppercase shadow-sm border ${config.bg} ${config.text} ${config.border}`}>
+      {config.label}
+    </div>
+  );
+};
+
+const AIDetailsModal = ({ isOpen, onClose, incident }) => {
+  if (!isOpen || !incident) return null;
+
+  return (
+    <div className="fixed inset-0 bg-theme-main/80 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+      <div className="bg-theme-sidebar border border-white/40 rounded-[32px] w-full max-w-lg shadow-2xl overflow-hidden flex flex-col">
+        <div className="flex justify-between items-center p-6 border-b border-white/20 shrink-0">
+          <h2 className="text-xl font-serif font-black text-theme-text">AI Incident Details</h2>
+          <button onClick={onClose} className="p-2 bg-theme-main text-theme-muted rounded-full hover:text-theme-accent transition-colors">
+            <X size={16} />
+          </button>
+        </div>
+        <div className="p-6 overflow-y-auto custom-scrollbar">
+          <div className="w-full h-64 rounded-2xl overflow-hidden mb-6 border border-white/40 shadow-inner relative">
+             <img src={incident.img} className="w-full h-full object-cover" alt="Incident" />
+             <div className="absolute top-4 left-4 bg-red-500/90 text-white text-[10px] font-black px-3 py-1.5 rounded-xl flex items-center gap-1.5 uppercase backdrop-blur-sm shadow-md">
+                <AlertTriangle size={12}/> {incident.confidence}% Confidence
+             </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-theme-main p-4 rounded-xl shadow-inner border border-white/20">
+              <p className="text-[10px] font-black uppercase text-theme-muted tracking-widest">Incident ID</p>
+              <p className="text-sm font-bold text-theme-text mt-1">{incident.id}</p>
+            </div>
+            <div className="bg-theme-main p-4 rounded-xl shadow-inner border border-white/20">
+              <p className="text-[10px] font-black uppercase text-theme-muted tracking-widest">Target Unit</p>
+              <p className="text-sm font-bold text-theme-text mt-1">{incident.unit}</p>
+            </div>
+            <div className="bg-theme-main p-4 rounded-xl shadow-inner border border-white/20 col-span-2">
+              <p className="text-[10px] font-black uppercase text-theme-muted tracking-widest">Detected Location & Time</p>
+              <p className="text-sm font-bold text-theme-text mt-1 flex items-center gap-1"><MapPin size={12} className="text-theme-muted"/> {incident.location} • {incident.time}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -56,9 +97,47 @@ export default function Violations() {
   const [violations, setViolations] = useState(VIOLATIONS_TABLE);
   const [stats, setStats] = useState(VIOLATION_STATS);
 
+  const [selectedAiIncident, setSelectedAiIncident] = useState(null);
+  const [aiQueue, setAiQueue] = useState([
+    {
+      id: '20251121SW-1',
+      unit: 'Unit_12',
+      unitNum: '12',
+      confidence: 94,
+      img: 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&q=60&w=400',
+      location: 'Colombo 06',
+      time: '14:20 PM',
+      confirmed: false
+    },
+    {
+      id: '20251121SW-2',
+      unit: 'Unit_08',
+      unitNum: '08',
+      confidence: 88,
+      img: 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&q=60&w=400',
+      location: 'Colombo 05',
+      time: '09:15 AM',
+      confirmed: false
+    }
+  ]);
+
+  const handleConfirmToggle = (id, currentStatus) => {
+    if (currentStatus) {
+      if (window.confirm("Are you sure you want to return this decision to unconfirmed?")) {
+        setAiQueue(prev => prev.map(item => item.id === id ? { ...item, confirmed: false } : item));
+      }
+    } else {
+      setAiQueue(prev => prev.map(item => item.id === id ? { ...item, confirmed: true } : item));
+    }
+  };
+
   React.useEffect(() => {
     violationAPI.getAll().then(data => {
-      if (data && Array.isArray(data) && data.length > 0) setViolations(data);
+      if (data && Array.isArray(data)) {
+        const merged = [...data, ...VIOLATIONS_TABLE];
+        const unique = Array.from(new Map(merged.map(item => [item.resident + item.date, item])).values());
+        setViolations(unique.slice(0, 15));
+      }
     }).catch(e => console.log('Using mock violations list', e));
 
     violationAPI.getStats().then(data => {
@@ -81,6 +160,11 @@ export default function Violations() {
 
   return (
     <div className="flex flex-col gap-6 bg-theme-main font-sans selection:bg-theme-accent selection:text-white pb-10">
+      <AIDetailsModal 
+        isOpen={!!selectedAiIncident} 
+        onClose={() => setSelectedAiIncident(null)} 
+        incident={selectedAiIncident} 
+      />
       
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -247,15 +331,15 @@ export default function Violations() {
             <button className="text-[10px] font-black text-theme-muted uppercase hover:text-theme-accent transition-all">Expand All</button>
            </div>
            
-           {[1, 2].map(i => (
-             <div key={i} className="bg-theme-card p-6 rounded-[35px] shadow-sm border border-white/40 hover:border-theme-accent transition-all duration-300 group">
+           {aiQueue.map(incident => (
+             <div key={incident.id} className={`bg-theme-card p-6 rounded-[35px] shadow-sm border transition-all duration-300 group ${incident.confirmed ? 'border-red-500/50' : 'border-white/40 hover:border-theme-accent'}`}>
                 <div className="flex justify-between items-center mb-5">
                    <div className="flex items-center gap-3">
                       <div className="w-12 h-12 bg-theme-sidebar rounded-2xl flex items-center justify-center text-theme-accent font-black border border-white/50 text-sm shadow-inner group-hover:bg-white transition-colors">
-                        {i === 1 ? '12' : '08'}
+                        {incident.unitNum}
                       </div>
                       <div>
-                        <p className="text-sm font-black text-theme-text tracking-tight">Unit_{i === 1 ? '12' : '08'}</p>
+                        <p className={`text-sm font-black tracking-tight transition-colors ${incident.confirmed ? 'text-red-500' : 'text-theme-text'}`}>{incident.unit}</p>
                         <p className="text-[9px] text-theme-muted font-bold uppercase tracking-tighter">AI-Detected Log</p>
                       </div>
                    </div>
@@ -263,24 +347,34 @@ export default function Violations() {
                 </div>
                 <div className="h-44 bg-theme-sidebar rounded-[28px] mb-5 overflow-hidden border border-white/40 relative">
                    <img 
-                    src={`https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&q=60&w=400`} 
+                    src={incident.img} 
                     className="w-full h-full object-cover mix-blend-multiply opacity-90 group-hover:scale-110 transition-transform duration-700" 
                     alt="Violation" 
                    />
                    <div className="absolute top-4 left-4 bg-red-500/90 text-white text-[8px] font-black px-2 py-1 rounded-lg flex items-center gap-1 uppercase backdrop-blur-sm shadow-sm">
-                     <AlertTriangle size={8}/> 94% Confidence
+                     <AlertTriangle size={8}/> {incident.confidence}% Confidence
                    </div>
                 </div>
                 <div className="space-y-1.5 mb-6 px-1">
-                  <p className="text-[11px] font-black text-theme-text uppercase tracking-widest">Incident: 2025112{i}SW</p>
+                  <p className="text-[11px] font-black text-theme-text uppercase tracking-widest">Incident: {incident.id}</p>
                   <div className="flex items-center gap-2 text-theme-muted">
                     <MapPin size={12}/>
-                    <p className="text-[10px] font-bold">Colombo 06 • 14:20 PM</p>
+                    <p className="text-[10px] font-bold">{incident.location} • {incident.time}</p>
                   </div>
                 </div>
                 <div className="flex gap-3">
-                   <button className="flex-[0.8] py-3 rounded-2xl bg-white text-[10px] font-black uppercase text-theme-text border border-white/50 shadow-sm hover:bg-theme-main transition-all tracking-widest">Details</button>
-                   <button className="flex-1 py-3 rounded-2xl bg-theme-accent text-[10px] font-black uppercase text-white shadow-md hover:opacity-90 transition-all flex items-center justify-center gap-2 tracking-widest"><ShieldCheck size={14}/> Confirm</button>
+                   <button 
+                     className="flex-[0.8] py-3 rounded-2xl bg-white text-[10px] font-black uppercase text-theme-text border border-white/50 shadow-sm hover:bg-theme-main transition-all tracking-widest"
+                     onClick={() => setSelectedAiIncident(incident)}
+                   >
+                     Details
+                   </button>
+                   <button 
+                     className={`flex-1 py-3 rounded-2xl text-[10px] font-black uppercase shadow-md transition-all flex items-center justify-center gap-2 tracking-widest ${incident.confirmed ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-theme-accent text-white hover:opacity-90'}`}
+                     onClick={() => handleConfirmToggle(incident.id, incident.confirmed)}
+                   >
+                     <ShieldCheck size={14}/> {incident.confirmed ? 'Confirmed' : 'Confirm'}
+                   </button>
                 </div>
              </div>
            ))}

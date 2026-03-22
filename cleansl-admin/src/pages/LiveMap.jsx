@@ -192,16 +192,16 @@ export default function LiveMap() {
             <div className="absolute top-6 right-6 z-[1000] bg-white/90 text-theme-text p-4 rounded-3xl shadow-xl flex items-center gap-3 backdrop-blur-md border border-white">
                <div className="bg-theme-sidebar p-2.5 rounded-2xl text-theme-accent shadow-inner"><Truck size={20}/></div>
                <div>
-                 <p className="text-[11px] font-black uppercase tracking-widest">Truck T-01</p>
-                 <p className="text-[10px] text-theme-muted font-bold tracking-tight">No. 45, Rosmead Place</p>
+                 <p className="text-[11px] font-black uppercase tracking-widest">Truck {activeTruck.id}</p>
+                 <p className="text-[10px] text-theme-muted font-bold tracking-tight">{activeTruck.location}</p>
                </div>
             </div>
           </div>
 
           {/* Stat Panel */}
           <div className="bg-theme-sidebar p-5 md:p-6 rounded-[32px] flex flex-wrap lg:flex-nowrap justify-between items-center shadow-inner border border-white/60 gap-4">
-            <StatItem icon={<Navigation className="text-theme-accent" size={18}/>} label="Current Location" value="No. 45, Rosmead Place" sub="Ward 07: Cinnamon Gardens" />
-            <StatItem icon={<Gauge className="text-theme-accent" size={18}/>} label="Speed" value="32 km/hr" sub="Steady Speed" />
+            <StatItem icon={<Navigation className="text-theme-accent" size={18}/>} label="Current Location" value={activeTruck.location} sub="Ward 07: Cinnamon Gardens" />
+            <StatItem icon={<Gauge className="text-theme-accent" size={18}/>} label="Speed" value={activeTruck.location.includes('km/h') ? activeTruck.location.split('(')[1].replace(')', '') : '32 km/hr'} sub="Steady Speed" />
             <StatItem icon={<Trash2 className="text-orange-500" size={18}/>} label="Bin Capacity" value="65% Full" sub="Alert at 90%" />
             <StatItem icon={<Clock className="text-theme-text" size={18}/>} label="Shift Time" value="4h 30m Active" sub="Ends 4:30 PM" />
           </div>

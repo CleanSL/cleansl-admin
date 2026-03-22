@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Search, 
   User,
@@ -9,7 +10,9 @@ import {
   ChevronRight,
   Maximize2,
   MapPin,
-  Clock
+  Clock,
+  X,
+  ShieldCheck
 } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -31,6 +34,128 @@ let DefaultIcon = L.icon({
 L.Marker.prototype.options.icon = DefaultIcon;
 
 // Reusable Components
+const AddDriverModal = ({ isOpen, onClose, onAdd }) => {
+  const [formData, setFormData] = useState({ firstName: '', lastName: '', vehicle: '', route: '' });
+
+  if (!isOpen) return null;
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!formData.firstName || !formData.lastName) return;
+    
+    // Create new driver object matching the table format
+    const newDriver = {
+      id: Math.random().toString(36).substr(2, 9),
+      name: `${formData.firstName} ${formData.lastName}`,
+      username: `@${formData.firstName.toLowerCase()}`,
+      hours: '0h',
+      vehicle: formData.vehicle || `TRK-${Math.floor(Math.random() * 100).toString().padStart(3, '0')}`,
+      route: formData.route || 'Unassigned',
+      status: 'Active'
+    };
+    
+    onAdd(newDriver);
+    setFormData({ firstName: '', lastName: '', vehicle: '', route: '' });
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 bg-theme-main/80 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+      <div className="bg-theme-sidebar border border-white/40 rounded-[32px] w-full max-w-md shadow-2xl overflow-hidden shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)]">
+        <div className="flex justify-between items-center p-6 border-b border-white/20">
+          <h2 className="text-xl font-serif font-black text-theme-text">Add New Driver</h2>
+          <button onClick={onClose} className="p-2 bg-theme-main text-theme-muted rounded-full hover:text-theme-accent transition-colors">
+            <X size={16} />
+          </button>
+        </div>
+        
+        <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4">
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <label className="text-[10px] font-black uppercase text-theme-muted tracking-widest mb-2 block">First Name</label>
+              <input 
+                type="text" 
+                required
+                value={formData.firstName}
+                onChange={e => setFormData({...formData, firstName: e.target.value})}
+                className="w-full bg-theme-main border border-white/30 rounded-xl px-4 py-3 text-sm font-bold text-theme-text shadow-inner focus:outline-none focus:border-theme-accent"
+                placeholder="Kamal"
+              />
+            </div>
+            <div className="flex-1">
+              <label className="text-[10px] font-black uppercase text-theme-muted tracking-widest mb-2 block">Last Name</label>
+              <input 
+                type="text" 
+                required
+                value={formData.lastName}
+                onChange={e => setFormData({...formData, lastName: e.target.value})}
+                className="w-full bg-theme-main border border-white/30 rounded-xl px-4 py-3 text-sm font-bold text-theme-text shadow-inner focus:outline-none focus:border-theme-accent"
+                placeholder="Perera"
+              />
+            </div>
+          </div>
+          
+          <div>
+            <label className="text-[10px] font-black uppercase text-theme-muted tracking-widest mb-2 block">Assign Vehicle (Optional)</label>
+            <input 
+              type="text" 
+              value={formData.vehicle}
+              onChange={e => setFormData({...formData, vehicle: e.target.value})}
+              className="w-full bg-theme-main border border-white/30 rounded-xl px-4 py-3 text-sm font-bold text-theme-text shadow-inner focus:outline-none focus:border-theme-accent"
+              placeholder="e.g. TRK-015"
+            />
+          </div>
+
+          <div>
+            <label className="text-[10px] font-black uppercase text-theme-muted tracking-widest mb-2 block">Assign Route (Optional)</label>
+            <input 
+              type="text" 
+              value={formData.route}
+              onChange={e => setFormData({...formData, route: e.target.value})}
+              className="w-full bg-theme-main border border-white/30 rounded-xl px-4 py-3 text-sm font-bold text-theme-text shadow-inner focus:outline-none focus:border-theme-accent"
+              placeholder="e.g. Ward 07"
+            />
+          </div>
+
+          <div className="flex gap-3 mt-6">
+            <button type="button" onClick={onClose} className="flex-1 py-3 px-4 rounded-xl text-xs font-black uppercase tracking-widest text-theme-muted bg-theme-main border border-white/40 hover:text-theme-text transition-colors shadow-sm">
+              Cancel
+            </button>
+            <button type="submit" className="flex-1 py-3 px-4 rounded-xl text-xs font-black uppercase tracking-widest text-white bg-theme-accent hover:opacity-90 transition-opacity shadow-md">
+              Save & Add
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+const ViolationsModal = ({ isOpen, onClose }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 bg-theme-main/80 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+      <div className="bg-theme-sidebar border border-white/40 rounded-[32px] w-full max-w-md shadow-2xl overflow-hidden shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)]">
+        <div className="flex justify-between items-center p-6 border-b border-white/20">
+          <h2 className="text-xl font-serif font-black text-theme-text text-red-500">Driver Violations (AI Detect)</h2>
+          <button onClick={onClose} className="p-2 bg-theme-main text-theme-muted rounded-full hover:text-theme-accent transition-colors">
+            <X size={16} />
+          </button>
+        </div>
+        <div className="p-10 flex flex-col items-center justify-center text-center gap-4">
+          <div className="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/20 shadow-inner">
+             <ShieldCheck size={32} />
+          </div>
+          <div>
+            <h3 className="text-lg font-black text-theme-text font-serif">No Violations Found</h3>
+            <p className="text-xs text-theme-muted font-bold mt-2 leading-relaxed">The Anomaly Detection System has not flagged any active drivers for route deviation or unauthorized stops today.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const AvatarGroup = ({ count }) => (
   <div className="flex -space-x-2 items-center">
     {[1, 2, 3].map(i => (
@@ -42,24 +167,40 @@ const AvatarGroup = ({ count }) => (
   </div>
 );
 
-const DriverSummaryCard = ({ title, extraLabel, extraColor, avatars }) => (
-  <div className="bg-theme-sidebar p-5 rounded-2xl border border-white/30 shadow-sm flex flex-col gap-3">
+const DriverSummaryCard = ({ title, extraLabel, extraColor, avatars, onClick }) => (
+  <div className="bg-theme-sidebar p-5 rounded-2xl border border-white/30 shadow-sm flex flex-col gap-3 cursor-pointer hover:border-theme-accent transition-colors" onClick={onClick}>
     <div className="flex justify-between items-center">
       <h4 className="text-sm font-black text-theme-text">{title}</h4>
       {avatars && <AvatarGroup count={avatars} />}
     </div>
     {extraLabel && (
-      <button className={`text-[11px] font-bold flex items-center gap-1 hover:opacity-75 transition-opacity ${extraColor || 'text-theme-accent'}`} onClick={() => alert("Loading details...")}>
+      <div className={`text-[11px] font-bold flex items-center gap-1 hover:opacity-75 transition-opacity ${extraColor || 'text-theme-accent'}`}>
         {extraLabel}
-      </button>
+      </div>
     )}
   </div>
 );
 
 export default function FleetStatus() {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [drivers, setDrivers] = useState([]);
   const [activeRoute, setActiveRoute] = useState([[6.9145, 79.8650], [6.9080, 79.8700], [6.8900, 79.8600]]);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isViolationsModalOpen, setIsViolationsModalOpen] = useState(false);
+
+  const exportToCSV = () => {
+    const headers = ['Driver Name', 'Username', 'Hours', 'Vehicle', 'Route', 'Status'];
+    const csvContent = [
+      headers.join(','),
+      ...drivers.map(d => [d.name, d.username, d.hours, d.vehicle, d.route, d.status].join(','))
+    ].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'driver_log.csv';
+    link.click();
+  };
 
   React.useEffect(() => {
     userAPI.getAll().then(users => {
@@ -92,6 +233,16 @@ export default function FleetStatus() {
 
   return (
     <div className="flex flex-col gap-6 bg-theme-main font-sans selection:bg-theme-accent selection:text-white pb-10">
+      <AddDriverModal 
+        isOpen={isAddModalOpen} 
+        onClose={() => setIsAddModalOpen(false)} 
+        onAdd={(newDriver) => setDrivers([newDriver, ...drivers])} 
+      />
+      <ViolationsModal
+        isOpen={isViolationsModalOpen}
+        onClose={() => setIsViolationsModalOpen(false)}
+      />
+      
       {/* Header & Global Filters */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-theme-muted/10 pb-6 shrink-0">
         <div>
@@ -131,7 +282,7 @@ export default function FleetStatus() {
           <div className="bg-theme-card rounded-[32px] border border-white/30 shadow-sm overflow-hidden flex flex-col">
              {/* Table Output Controls */}
              <div className="p-5 flex justify-between items-center border-b border-white/20 bg-theme-sidebar/50">
-                <button className="flex items-center gap-2 border border-theme-muted/20 bg-theme-sidebar px-4 py-2 rounded-xl text-[10px] font-black uppercase text-theme-muted tracking-widest hover:border-theme-muted/50 transition-colors" onClick={() => alert("Downloading CSV...")}>
+                <button className="flex items-center gap-2 border border-theme-muted/20 bg-theme-sidebar px-4 py-2 rounded-xl text-[10px] font-black uppercase text-theme-muted tracking-widest hover:border-theme-muted/50 transition-colors" onClick={exportToCSV}>
                   <Download size={14} /> Export
                 </button>
                 <div className="flex gap-4 items-center">
@@ -145,7 +296,7 @@ export default function FleetStatus() {
                       className="pl-9 pr-4 py-2 bg-theme-sidebar rounded-xl text-xs outline-none border border-white/30 focus:border-theme-accent w-48 shadow-inner"
                     />
                   </div>
-                  <button className="flex items-center gap-1.5 bg-theme-accent text-white px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md hover:bg-theme-accent/90 transition-colors" onClick={() => alert("Add Driver Modal")}>
+                  <button className="flex items-center gap-1.5 bg-theme-accent text-white px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md hover:bg-theme-accent/90 transition-colors" onClick={() => setIsAddModalOpen(true)}>
                      Add Driver
                   </button>
                 </div>
@@ -252,10 +403,10 @@ export default function FleetStatus() {
         <div className="w-full xl:w-[320px] shrink-0 flex flex-col gap-4">
            {/* Top Info Cards */}
            <div className="grid grid-cols-1 gap-4">
-             <DriverSummaryCard title="85% Route Coverd" avatars="9" />
-             <DriverSummaryCard title="12 Active Drivers" extraLabel="▶ View Drivers" />
-             <DriverSummaryCard title="4 Total Drivers" avatars="1" />
-             <DriverSummaryCard title="Driver Violations" extraLabel="▶ View Violation Details" extraColor="text-red-400" />
+             <DriverSummaryCard title="85% Route Coverd" avatars="9" onClick={() => navigate('/live-map')} />
+             <DriverSummaryCard title="12 Active Drivers" extraLabel="▶ View Drivers" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} />
+             <DriverSummaryCard title="4 Total Drivers" avatars="1" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} />
+             <DriverSummaryCard title="Driver Violations" extraLabel="▶ View Violation Details" extraColor="text-red-400" onClick={() => setIsViolationsModalOpen(true)} />
            </div>
 
            {/* Cities Progress */}
