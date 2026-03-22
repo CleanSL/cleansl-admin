@@ -64,6 +64,48 @@ export default function ReportsAnalytics() {
     fetchAnalyticsData();
   }, []);
 
+  const handleExportCSV = () => {
+    let csvContent = "";
+    
+    csvContent += "=== Summary ===\n";
+    csvContent += `Metric,Value,Trend\n`;
+    // Removing commas from values if they contain commas (e.g. "1,245")
+    const cleanValue = (val) => String(val).replace(/,/g, '');
+    csvContent += `Waste Collected,${cleanValue(analyticsData.totals.waste.value)},${analyticsData.totals.waste.trend}\n`;
+    csvContent += `Total Pickups,${cleanValue(analyticsData.totals.pickups.value)},${analyticsData.totals.pickups.trend}\n`;
+    csvContent += `Active Users,${cleanValue(analyticsData.totals.users.value)},${analyticsData.totals.users.trend}\n\n`;
+
+    if (analyticsData.monthlyTrends?.length) {
+      csvContent += "=== Monthly Trends ===\n";
+      csvContent += "Period,Value\n";
+      analyticsData.monthlyTrends.forEach(row => {
+        csvContent += `${row.name},${row.value}\n`;
+      });
+      csvContent += "\n";
+    }
+
+    if (analyticsData.wasteDistribution?.length) {
+      csvContent += "=== Waste Distribution ===\n";
+      csvContent += "Category,Value\n";
+      analyticsData.wasteDistribution.forEach(row => {
+        csvContent += `${row.name},${row.value}\n`;
+      });
+      csvContent += "\n";
+    }
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", `analytics_report_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-6 bg-theme-main p-8 h-full overflow-y-auto font-sans selection:bg-theme-accent selection:text-white">
       {/* Header */}
@@ -78,7 +120,7 @@ export default function ReportsAnalytics() {
             <input type="text" placeholder="Reports & Analytics" className="w-full pl-12 pr-4 py-3 bg-white border border-white/50 rounded-full text-sm font-bold text-theme-text placeholder-theme-muted/50 shadow-inner outline-none focus:ring-2 focus:ring-theme-accent transition-all" />
           </div>
           <button className="flex items-center justify-center gap-2 px-5 py-3 bg-white rounded-2xl text-xs font-black text-theme-muted hover:text-theme-text border border-white/50 shadow-sm transition-all flex-1 md:flex-none"><Calendar size={16}/> This Month</button>
-          <button className="flex items-center justify-center gap-2 px-6 py-3 bg-theme-accent rounded-2xl text-xs font-black text-white shadow-md hover:opacity-90 transition-all flex-1 md:flex-none"><Download size={16}/> Export</button>
+          <button onClick={handleExportCSV} className="flex items-center justify-center gap-2 px-6 py-3 bg-theme-accent rounded-2xl text-xs font-black text-white shadow-md hover:opacity-90 transition-all flex-1 md:flex-none"><Download size={16}/> Export</button>
         </div>
       </div>
 
