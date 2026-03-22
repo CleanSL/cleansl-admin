@@ -1,12 +1,13 @@
 import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart as RechartsPie, Pie, Cell } from 'recharts';
 import { Truck, AlertTriangle, Map, FileText, ArrowUpRight, ArrowDownRight, CheckCircle2, Search } from 'lucide-react';
 import { MOCK_STATS, MOCK_OPERATIONS } from '../data/mockData';
 import { analyticsAPI } from '../services/api';
 
 // --- Reusable Stat Card ---
-const StatCard = ({ title, value, trend, isNegative, icon, subtitle }) => (
-  <div className="bg-theme-card rounded-[32px] p-6 shadow-sm flex flex-col justify-between border border-white/40 cursor-pointer hover:border-theme-accent transition-colors group" onClick={() => alert(`Redirecting to details for ${title}`)}>
+const StatCard = ({ title, value, trend, isNegative, icon, subtitle, onClick }) => (
+  <div className="bg-theme-card rounded-[32px] p-6 shadow-sm flex flex-col justify-between border border-white/40 cursor-pointer hover:border-theme-accent transition-colors group" onClick={onClick}>
     <div className="flex justify-between items-start mb-4">
       <div className="flex items-center gap-2 text-theme-text font-bold text-sm">
         {icon} <span>{title}</span>
@@ -53,6 +54,7 @@ const FeedRow = ({ num, event, detail, time, status, color }) => {
 };
 
 export default function Overview() {
+  const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('all');
   
@@ -98,10 +100,10 @@ export default function Overview() {
     <div className="max-w-[1400px] mx-auto">
       {/* TOP 4 STAT CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
-        <StatCard title="Total Pickups" value={stats.totalPickups.toString()} trend="+12%" subtitle="this week" icon={<Truck size={16} />} />
-        <StatCard title="Missed Pickups" value={stats.missedPickups.toString()} trend="-2%" subtitle="this week" isNegative={true} icon={<AlertTriangle size={16} />} />
-        <StatCard title="Active Trucks" value={stats.activeTrucks.toString().padStart(2, '0')} trend={`+${stats.activeTrucks} active`} subtitle="" icon={<Map size={16} />} />
-        <StatCard title="New Complaints" value={stats.newComplaints.toString().padStart(2, '0')} trend="Pending" subtitle="queue" icon={<FileText size={16} />} />
+        <StatCard title="Total Pickups" value={stats.totalPickups.toString()} trend="+12%" subtitle="this week" icon={<Truck size={16} />} onClick={() => navigate('/driver-log')} />
+        <StatCard title="Missed Pickups" value={stats.missedPickups.toString()} trend="-2%" subtitle="this week" isNegative={true} icon={<AlertTriangle size={16} />} onClick={() => navigate('/complaints')} />
+        <StatCard title="Active Trucks" value={stats.activeTrucks.toString().padStart(2, '0')} trend={`+${stats.activeTrucks} active`} subtitle="" icon={<Map size={16} />} onClick={() => navigate('/driver-log')} />
+        <StatCard title="New Complaints" value={stats.newComplaints.toString().padStart(2, '0')} trend="Pending" subtitle="queue" icon={<FileText size={16} />} onClick={() => navigate('/complaints')} />
       </div>
 
       {/* MIDDLE CHARTS ROW */}
